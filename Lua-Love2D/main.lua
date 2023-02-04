@@ -4,7 +4,7 @@ require("flake")
 function love.load()
     -- Game variables.
     Score = 0
-    GameOver = true
+    Playing = false
 
     -- Seed random numbers.
     math.randomseed(os.time())
@@ -27,7 +27,7 @@ function love.load()
         table.insert(Flakes, flake)
     end
 
-    GameOver = false
+    Playing = true
 
     -- Game Font Sizes.
     ScoreFont = love.graphics.newFont("fonts/freesansbold.ttf", 24)
@@ -44,7 +44,7 @@ function love.load()
 end
 
 function love.update(dt)
-    if not GameOver then
+    if Playing then
         Player:update(dt)
         for _, flake in pairs(Flakes) do
             flake:update(dt)
@@ -65,12 +65,12 @@ end
 function love.keypressed(k)
     if k == "escape" then
        love.event.quit()
-    elseif GameOver and k == "space" then
+    elseif k == "space" and not Playing then
         Score = 0
         for _, flake in pairs(Flakes) do
             flake:reset()
         end
-        GameOver = false
+        Playing = true
         Music:play()
     end
  end
@@ -86,7 +86,7 @@ function CheckCollision(flake, player)
         else
             Music:stop()
             Hit:play()
-            GameOver = true
+            Playing = false
         end
     end
 end

@@ -23,10 +23,10 @@ function Flake:new(color)
 end
 
 function Flake:reset()
-    if GameOver then
-        self.y = -self.height - math.random(0, love.graphics.getHeight() * 2 )
-    else
+    if Playing then
         self.y = -self.height - math.random(0, love.graphics.getHeight())
+    else
+        self.y = -self.height - math.random(0, love.graphics.getHeight() * 2 )
     end
     self.x = math.random(0, (love.graphics.getWidth() - self.width))
     self.left = self.x
