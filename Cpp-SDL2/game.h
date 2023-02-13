@@ -17,6 +17,7 @@ public:
     bool playing = true;
 
 private:
+    const char* title = "Don't Eat the Yellow Snow!";
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Texture* background = nullptr;

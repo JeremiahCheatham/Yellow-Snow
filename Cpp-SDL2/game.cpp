@@ -12,7 +12,7 @@ Game::Game() {
     }
 
     // Create a window
-    this->window = SDL_CreateWindow("Basic Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->width, this->height, SDL_WINDOW_SHOWN);
+    this->window = SDL_CreateWindow(this->title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, this->width, this->height, SDL_WINDOW_SHOWN);
     if (!this->window) {
         auto error = fmt::format("Error creating window: {}", SDL_GetError());
         throw std::runtime_error(error);
@@ -60,6 +60,15 @@ Game::Game() {
 }
 
 void Game::init() {
+    SDL_Surface* surface = IMG_Load("images/yellow.png");
+    if (surface) {
+        SDL_SetWindowIcon(this->window, surface);
+        SDL_FreeSurface(surface);
+    } else {
+        auto error = fmt::format("Error creating a surface: {}", SDL_GetError());
+        throw std::runtime_error(error); 
+    }
+
     this->background = IMG_LoadTexture(this->renderer, "images/background.png");
     if (!this->background) {
         auto error = fmt::format("Error creating a texture: {}", SDL_GetError());
