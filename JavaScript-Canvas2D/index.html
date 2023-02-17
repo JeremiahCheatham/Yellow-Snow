@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Don't Eat the Yellow Snow!</title>
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="title">
+        <h1>Don't Eat the Yellow Snow!</h1>
+        <div class="game-image"></div>
+        <canvas id="gameCanvas" width="800" height="600" style="display:none;"></canvas>
+    </div>
+    <script>
+        // When the play button is clicked, hide the game image and show the canvas
+        document.querySelector('.game-image').addEventListener('click', function() {
+            document.querySelector('.game-image').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            document.head.appendChild(script);
+        });
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <a href="https://www.starche.org/">
+      <img id="logo" src="https://www.starche.org/starche.png" alt="starche.org" height="25" />
+    </a>
+    <div id="title">
+      <h1>Snake Game</h1>
+      <canvas id="gameCanvas" width="640" ; height="480"></canvas>
+      <audio id="endMp3" src="https://maxw.com/low.mp3"></audio>
+      <audio id="turnMp3" src="https://maxw.com/high.mp3"></audio>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html> -->

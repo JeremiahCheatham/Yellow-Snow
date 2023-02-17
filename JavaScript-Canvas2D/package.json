@@ -1,0 +1,20 @@
+{
+    "name": "yellow-snow",
+    "version": "1.0.0",
+    "description": "Don't Eat the Yellow Snow!",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "files": [
+        "main.js",
+        "index2.html",
+        "style.css"
+    ],
+    "extraFiles": [
+        "package.json"
+    ],
+    "devDependencies": {
+        "electron": "^22.3.0"
+    }
+}

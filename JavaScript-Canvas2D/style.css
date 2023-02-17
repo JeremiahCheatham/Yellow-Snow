@@ -1,0 +1,40 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+  
+body {
+    background-image: linear-gradient(to top left, #2604b0 0%, #0dc2c8 100%);
+    position: relative;
+    width: 840px;
+    margin: auto;
+    height: 100vh;
+    overflow: hidden;
+}
+
+
+.game-image {
+    width: 800px;
+    height: 600px;
+    background: url('images/screenshot.png') no-repeat center center;
+    margin: 0 auto 20px;
+}
+
+  
+#title {
+    margin-top: 40px;
+    text-align: center;
+    color: rgb(240, 220, 0);
+    background-color: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    filter: blur();
+    box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.311);
+    border-radius: 15px;
+    overflow: hidden;
+    line-height: 1.75;
+}
+  
+canvas {
+    margin: 0 auto 20px;
+}
