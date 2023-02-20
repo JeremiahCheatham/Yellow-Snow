@@ -9,7 +9,6 @@ import Foreign.C.Types
 import Control.Monad.State
 import System.Random
 import Data.Time.Clock.POSIX
-import Control.Concurrent
 import qualified Data.Text
 
 
@@ -29,7 +28,6 @@ data GameState = GameState { gameRenderer :: SDL.Renderer
                            , gameScoreTex :: SDL.Texture
                            , gameScoreRect :: SDL.Rectangle CInt
                            , gameOver :: Bool }
-
 
 
 -- Generate random number seeded from the time.
@@ -59,9 +57,9 @@ loadAssets renderer = do
   (player, playerDim) <- loadTexWithDim renderer "images/player.png"
   (white, flakeDim) <- loadTexWithDim renderer "images/white.png"
   yellow <- SDL.Image.loadTexture renderer "images/yellow.png"
-  collect <- SDL.Mixer.load "sounds/collect.wav" :: IO SDL.Mixer.Chunk
-  hit <- SDL.Mixer.load "sounds/hit.wav" :: IO SDL.Mixer.Chunk
-  music <- SDL.Mixer.load "music/winter_loop.mp3" :: IO SDL.Mixer.Music
+  collect <- SDL.Mixer.load "sounds/collect.wav"
+  hit <- SDL.Mixer.load "sounds/hit.wav"
+  music <- SDL.Mixer.load "music/winter_loop.mp3"
   let playerRect = SDL.Rectangle (SDL.P (SDL.V2 350 374)) playerDim
   whiteFlakes <- sequence (replicate 10 (generateFlake white True flakeDim))
   yellowFlakes <- sequence (replicate 5 (generateFlake yellow False flakeDim))
@@ -178,6 +176,11 @@ cleanup gameState window = do
   SDL.Font.quit
 
 
+  -- { audioFrequency = 44100
+  -- , audioFormat = FormatS16_LSB
+  -- , audioOutput = Stereo }
+
+
 main :: IO ()
 main = do
   -- Initialize SDL and SDL.TTF for use.
@@ -185,7 +188,10 @@ main = do
   SDL.Font.initialize
 
   -- Initialize SDL Mixer.
-  SDL.Mixer.openAudio SDL.Mixer.defaultAudio 4096
+  let myAudioConfig = SDL.Mixer.Audio { SDL.Mixer.audioFrequency = 44100
+                                      , SDL.Mixer.audioFormat = SDL.Mixer.FormatS16_LSB
+                                      , SDL.Mixer.audioOutput = SDL.Mixer.Stereo }
+  SDL.Mixer.openAudio myAudioConfig 4096
 
   -- Create the window and renderer.
   window <- SDL.createWindow "Don't Eat The Yellow Snow!" SDL.defaultWindow
@@ -195,7 +201,7 @@ main = do
   gameState <- loadAssets renderer
 
   -- Start playing background music on repeat.
-  _ <- forkIO $ SDL.Mixer.playMusic SDL.Mixer.Forever $ gameMusic gameState
+  SDL.Mixer.playMusic SDL.Mixer.Forever $ gameMusic gameState
 
   -- Start the main game loop using the gameState.
   evalStateT gameLoop gameState
@@ -269,7 +275,7 @@ gameLoop = do
     newFlakes <- liftIO $ resetFlakes oldFlakes
     (scoreTex, scoreRect) <- liftIO $ generateMsg renderer 10 10 "Score: 0" 24
     SDL.destroyTexture oldScoreTex
-    _ <- liftIO $ forkIO $ SDL.Mixer.playMusic SDL.Mixer.Forever music
+    _ <- liftIO $ SDL.Mixer.playMusic SDL.Mixer.Forever music
     return (newFlakes, 0, scoreTex, scoreRect, False)
     else return (oldFlakes, oldScore, oldScoreTex, oldScoreRect, oldOver)
 
