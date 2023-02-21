@@ -1,6 +1,6 @@
 ![Screenshot](images/screenshot.png)
 
-# Don't Eat the Yellow Snow! (C - SDL2)
+# Don't Eat the Yellow Snow! (C++ - SDL2)
 Earn points by collecting all the tasty white snow flakes that fall. But watch out for the yellow snow.
 
 # Build
