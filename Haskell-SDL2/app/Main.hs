@@ -8,34 +8,31 @@ import qualified SDL.Font
 import Foreign.C.Types
 import Control.Monad.State
 import System.Random
-import Data.Time.Clock.POSIX
 import qualified Data.Text
+
+
+-- Define a new GameData record.
+data GameData = GameData { gameBackground :: SDL.Texture
+                         , gamePlayer :: SDL.Texture
+                         , gamePlayerDim :: SDL.V2 CInt
+                         , gameWhiteFlake :: SDL.Texture
+                         , gameYellowFlake :: SDL.Texture
+                         , gameFlakeDim :: SDL.V2 CInt
+                         , gameMusic :: SDL.Mixer.Music
+                         , gameCollect :: SDL.Mixer.Chunk
+                         , gameHit :: SDL.Mixer.Chunk }
 
 
 -- Define a new GameState record.
 data GameState = GameState { gameRenderer :: SDL.Renderer
-                           , gameBackground :: SDL.Texture
-                           , gamePlayer :: SDL.Texture
                            , gamePlayerRect :: SDL.Rectangle CInt
                            , gamePlayerLeft :: Bool
-                           , gameWhiteFlake :: SDL.Texture
-                           , gameYellowFlake :: SDL.Texture
                            , gameFlakes :: [(SDL.Texture, Bool, SDL.Rectangle CInt)]
-                           , gameMusic :: SDL.Mixer.Music
-                           , gameCollect :: SDL.Mixer.Chunk
-                           , gameHit :: SDL.Mixer.Chunk
+                           , gameCollected :: Int
                            , gameScore :: Int
                            , gameScoreTex :: SDL.Texture
                            , gameScoreRect :: SDL.Rectangle CInt
                            , gameOver :: Bool }
-
-
--- Generate random number seeded from the time.
-setRandomSeed :: IO ()
-setRandomSeed = do
-    posixTime <- getPOSIXTime
-    let seed = floor $ posixTime * 1000000000
-    setStdGen (mkStdGen seed)
 
 
 -- Load an image in as surface. Get dimensions, free surface, return tex and dim.
@@ -48,9 +45,9 @@ loadTexWithDim renderer imageFile = do
     return (tex, dim)
 
 
--- Load all images and sounds assets and return GameState record.
-loadAssets :: SDL.Renderer -> IO GameState
-loadAssets renderer = do
+-- Load all images and sounds assets and return GameData record.
+createGameData :: SDL.Renderer -> IO GameData
+createGameData renderer = do
     background <- SDL.Image.loadTexture renderer "images/background.png"
     (player, playerDim) <- loadTexWithDim renderer "images/player.png"
     (white, flakeDim) <- loadTexWithDim renderer "images/white.png"
@@ -58,21 +55,33 @@ loadAssets renderer = do
     collect <- SDL.Mixer.load "sounds/collect.wav"
     hit <- SDL.Mixer.load "sounds/hit.wav"
     music <- SDL.Mixer.load "music/winter_loop.mp3"
+    return GameData { gameBackground = background
+                    , gamePlayer = player
+                    , gamePlayerDim = playerDim
+                    , gameWhiteFlake = white
+                    , gameYellowFlake = yellow
+                    , gameFlakeDim = flakeDim
+                    , gameMusic = music
+                    , gameCollect = collect
+                    , gameHit = hit }
+
+
+-- Load all state assets and return GameState record.
+createGameState :: SDL.Renderer -> GameData -> IO GameState
+createGameState renderer gameData = do
+    let playerDim = gamePlayerDim gameData
+        flakeDim = gameFlakeDim gameData
+        white = gameWhiteFlake gameData
+        yellow = gameYellowFlake gameData
     let playerRect = SDL.Rectangle (SDL.P (SDL.V2 350 374)) playerDim
     whiteFlakes <- sequence (replicate 10 (generateFlake white True flakeDim))
     yellowFlakes <- sequence (replicate 5 (generateFlake yellow False flakeDim))
     (scoreTex, scoreRect) <- generateMsg renderer 10 10 ("Score: 0") 24
     return GameState { gameRenderer = renderer
-                     , gameBackground = background
-                     , gamePlayer = player
                      , gamePlayerRect = playerRect
                      , gamePlayerLeft = False
-                     , gameWhiteFlake = white
-                     , gameYellowFlake = yellow
                      , gameFlakes = whiteFlakes ++ yellowFlakes
-                     , gameMusic = music
-                     , gameCollect = collect
-                     , gameHit = hit
+                     , gameCollected = 0
                      , gameScore = 0
                      , gameScoreTex = scoreTex
                      , gameScoreRect = scoreRect
@@ -149,17 +158,17 @@ checkKeysPressed events = foldr checkKey (False, False) events
 
 
 -- Free all asset memory and shutdown SDL.
-cleanup :: GameState -> SDL.Window -> IO ()
-cleanup gameState window = do
+cleanup :: GameData -> GameState -> SDL.Window -> IO ()
+cleanup gameData gameState window = do
+    let background = gameBackground gameData
+        player = gamePlayer gameData
+        white = gameWhiteFlake gameData
+        yellow = gameYellowFlake gameData
+        collect = gameCollect gameData
+        hit = gameHit gameData
+        music = gameMusic gameData
     let renderer = gameRenderer gameState
-        background = gameBackground gameState
-        player = gamePlayer gameState
-        white = gameWhiteFlake gameState
-        yellow = gameYellowFlake gameState
-        collect = gameCollect gameState
         scoreTex = gameScoreTex gameState
-        hit = gameHit gameState
-        music = gameMusic gameState
     SDL.Mixer.free music
     SDL.Mixer.free collect
     SDL.Mixer.free hit
@@ -190,19 +199,20 @@ main = do
     window <- SDL.createWindow "Don't Eat The Yellow Snow!" SDL.defaultWindow
     renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
 
-    -- Load all images and sounds assets and return GameState record. 
-    gameState <- loadAssets renderer
+    -- Load all images and sounds assets and return GameData record.
+    gameData <- createGameData renderer
 
-    setRandomSeed
+    -- Load all state assets and return GameState record.
+    gameState <- createGameState renderer gameData
 
     -- Start playing background music on repeat.
-    SDL.Mixer.playMusic SDL.Mixer.Forever $ gameMusic gameState
+    SDL.Mixer.playMusic SDL.Mixer.Forever $ gameMusic gameData
 
     -- Start the main game loop using the gameState.
-    evalStateT gameLoop gameState
+    evalStateT (gameLoop gameData) gameState
 
     -- Free all asset memory and shutdown SDL.
-    cleanup gameState window
+    cleanup gameData gameState window
 
 
 -- Update all Flakes keeping track of white flakes collected and if a yellow flake was hit.
@@ -223,12 +233,12 @@ updateFlake (tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x y)) (SDL.V2 w h))) (SDL
             numY <- randomRIO (0, 600)
             let numY' = (-numY) - h
             return (numX, numY', 0, False)
-        else if y + 5 > 360 && x > (playerX + 10) && x < (playerX + 100) then
+        else if y + 5 > 354 && x > (playerX + 10) && x < (playerX + 100) then
             if color then do
-            numX <- randomRIO (0, 800 - w)
-            numY <- randomRIO (0, 600)
-            let numY' = (-numY) - h
-            return (numX, numY', 1, False)
+                numX <- randomRIO (0, 800 - w)
+                numY <- randomRIO (0, 600)
+                let numY' = (-numY) - h
+                return (numX, numY', 1, False)
             else return (x, y + 5, 0, True)
         else return (x, y + 5, 0, False)
     return ((tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x' y')) (SDL.V2 w h))), s, o)
@@ -243,96 +253,117 @@ resetFlakes = mapM (\(tex, color, (SDL.Rectangle (SDL.P _) (SDL.V2 w h))) -> do
     return (tex, color, (SDL.Rectangle (SDL.P (SDL.V2 numX numY')) (SDL.V2 w h))))
 
 
--- Main game loop using gameState.
-gameLoop :: StateT GameState IO ()
-gameLoop = do
-    -- Get the current gameState. Get current gameState variables.
+-- Rest game.
+resetGame :: GameData -> StateT GameState IO ()
+resetGame gameData = do
     gameState <- get
     let renderer = gameRenderer gameState
-        background = gameBackground gameState
-        player = gamePlayer gameState
+        oldFlakes = gameFlakes gameState
+        oldScoreTex = gameScoreTex gameState
+    newFlakes <- liftIO $ resetFlakes oldFlakes
+    (newScoreTex, newScoreRect) <- liftIO $ generateMsg renderer 10 10 "Score: 0" 24
+    SDL.destroyTexture oldScoreTex
+    _ <- liftIO $ SDL.Mixer.playMusic SDL.Mixer.Forever $ gameMusic gameData
+    put gameState { gameScore = 0
+                  , gameFlakes = newFlakes
+                  , gameScoreTex = newScoreTex
+                  , gameScoreRect = newScoreRect
+                  , gameOver = False }
+
+
+-- Get current state of keyboard and update position and direction facing.
+updatePlayer :: StateT GameState IO ()
+updatePlayer = do
+    keyboardState <- SDL.getKeyboardState
+    gameState <- get
+    let oldPlayerRect = gamePlayerRect gameState
+        oldPlayerLeft = gamePlayerLeft gameState
+    let (newPlayerRect, newPlayerLeft) = checkKeysDown oldPlayerRect keyboardState oldPlayerLeft
+    put gameState { gamePlayerRect = newPlayerRect, gamePlayerLeft = newPlayerLeft }
+
+
+-- Only update flakes if game is not over.
+checkCollision :: GameData -> StateT GameState IO ()
+checkCollision gameData = do
+    gameState <- get
+    let oldFlakes = gameFlakes gameState
+        (SDL.Rectangle (SDL.P playerPos) _ ) = gamePlayerRect gameState
+    (newFlakes, newCollected, newOver) <- liftIO $ updateFlakes oldFlakes playerPos 0 False
+    when newOver $ do
+        SDL.Mixer.haltMusic
+        SDL.Mixer.play $ gameHit gameData
+    put gameState { gameFlakes = newFlakes, gameCollected = newCollected, gameOver = newOver }
+
+
+-- Update the score and score texture.
+updateScore :: GameData -> StateT GameState IO ()
+updateScore gameData = do
+    gameState <- get
+    let newCollected = gameCollected gameState
+    when (newCollected > 0) $ do
+        let newScore = (gameScore gameState) + newCollected
+            oldScoreTex = gameScoreTex gameState
+            renderer = gameRenderer gameState
+        SDL.Mixer.play $ gameCollect gameData
+        (newScoreTex, newScoreRect) <- liftIO $ generateMsg renderer 10 10 ("Score: " ++ show newScore) 24
+        SDL.destroyTexture oldScoreTex
+        put gameState { gameCollected = 0
+                      , gameScore = newScore
+                      , gameScoreTex = newScoreTex
+                      , gameScoreRect = newScoreRect }
+
+
+drawEverything  :: GameData -> StateT GameState IO ()
+drawEverything gameData = do
+    gameState <- get
+    let renderer = gameRenderer gameState
         playerRect = gamePlayerRect gameState
         playerLeft = gamePlayerLeft gameState
-        oldFlakes = gameFlakes gameState
-        music = gameMusic gameState
-        collect = gameCollect gameState
-        hit = gameHit gameState
-        oldScore = gameScore gameState
-        oldScoreTex = gameScoreTex gameState
-        oldScoreRect = gameScoreRect gameState
-        oldOver = gameOver gameState
+        flakes = gameFlakes gameState
+        scoreTex = gameScoreTex gameState
+        scoreRect = gameScoreRect gameState
+    let background = gameBackground gameData
+        player = gamePlayer gameData
+
+    -- Clear the renderer
+    SDL.clear $ renderer
+
+    -- Draw the assets to the renderer.
+    SDL.copy renderer background Nothing Nothing
+    SDL.copyEx renderer player Nothing (Just playerRect) 0 Nothing (SDL.V2 playerLeft False)
+
+    -- Draw all flakes to the renderer.
+    liftIO $ mapM_ (\(tex, _, rect) -> SDL.copy renderer tex Nothing (Just rect)) flakes
+
+    -- Draw the score.
+    SDL.copy renderer scoreTex Nothing (Just scoreRect)
+
+    -- Present the renderer/flip back and front buffers.
+    SDL.present renderer
+
+
+-- Main game loop using gameState.
+gameLoop :: GameData -> StateT GameState IO ()
+gameLoop gameData = do
+    -- Get the current gameState. Get current gameState variables.
+    gameState <- get
+    let over = gameOver gameState
 
     -- Get current events and check for key pressed events.
     events <- SDL.pollEvents
     let (escapePressed, spacePressed) = ( checkKeysPressed events )
 
-    -- Rest game.
-    (flakes, score, scoreTex, scoreRect, over) <-
-        if spacePressed && oldOver then do
-            newFlakes <- liftIO $ resetFlakes oldFlakes
-            (scoreTex, scoreRect) <- liftIO $ generateMsg renderer 10 10 "Score: 0" 24
-            SDL.destroyTexture oldScoreTex
-            _ <- liftIO $ SDL.Mixer.playMusic SDL.Mixer.Forever music
-            return (newFlakes, 0, scoreTex, scoreRect, False)
-        else return (oldFlakes, oldScore, oldScoreTex, oldScoreRect, oldOver)
+    if over then do
+        when spacePressed (resetGame gameData)
+    else do
+        updatePlayer
+        checkCollision gameData
+        updateScore gameData
 
-
-    -- Get current state of keyboard and update position and direction facing.
-    keyboardState <- SDL.getKeyboardState
-    let (playerRect', playerLeft') = if over
-                                    then (playerRect, playerLeft)
-                                    else checkKeysDown playerRect keyboardState playerLeft
-
-
-    -- Only update flakes if game is not over.
-    (newFlakes, collected, newOver) <-
-        if over then return (flakes, 0, over)
-        else do
-            let (SDL.Rectangle (SDL.P playerPos) _ ) = playerRect'
-            (newFlakes, collected, newOver) <- liftIO $ updateFlakes flakes playerPos 0 over
-            when newOver $ do
-                SDL.Mixer.haltMusic
-                SDL.Mixer.play hit
-            return (newFlakes, collected, newOver) 
-
-
-    -- Update the score and score texture.
-    (newScore, newScoreTex, newScoreRect) <-
-        if collected > 0 then do
-            let newScore = collected + score
-            SDL.Mixer.play collect
-            (newScoreTex, newScoreRect) <- liftIO $ generateMsg renderer 10 10 ("Score: " ++ show newScore) 24
-            SDL.destroyTexture scoreTex
-            return (newScore, newScoreTex, newScoreRect)
-        else return (score, scoreTex, scoreRect)
-
-    -- Clear the renderer
-    SDL.clear $ gameRenderer gameState
-
-    -- Draw the assets to the renderer.
-    SDL.copy renderer background Nothing Nothing
-    SDL.copyEx renderer player Nothing (Just playerRect') 0 Nothing (SDL.V2 playerLeft' False)
-
-    -- Draw all flakes to the renderer.
-    liftIO $ mapM_ (\(tex, _, rect) -> SDL.copy renderer tex Nothing (Just rect)) newFlakes
-
-    -- Draw the score.
-    SDL.copy renderer newScoreTex Nothing (Just newScoreRect)
-
-    -- Present the renderer/flip back and front buffers.
-    SDL.present renderer
+    drawEverything gameData
 
     -- Appoximate 60FPS with a 16ms delay.
     SDL.delay 16
 
-    -- Update the gameState
-    put gameState { gamePlayerRect = playerRect'
-                , gamePlayerLeft = playerLeft'
-                , gameFlakes = newFlakes
-                , gameScore = newScore
-                , gameScoreTex = newScoreTex
-                , gameScoreRect = newScoreRect
-                , gameOver = newOver }
-
     -- Loop unless escaped pressed.
-    unless escapePressed (gameLoop)
+    unless escapePressed (gameLoop gameData)
