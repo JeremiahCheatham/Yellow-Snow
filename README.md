@@ -12,9 +12,10 @@ Escape - Quits and closes game.
 # Ports
 [C - SDL2](C-SDL2)\
 [C++ - SDL2](Cpp-SDL2)\
-[Ruby - Gosu](Ruby-Gosu)\
-[Lua - Love2D](Lua-Love2D)\
 [Haskell - SDL2](Haskell-SDL2)\
+[JavaScript - Canvas2D](JavaScript-Canvas2D)\
 [Python - PyGame](Python-PyGame)\
 [Python - PyGame Zero](Python-PyGame-Zero)\
-[JavaScript - Canvas2D](JavaScript-Canvas2D)
+[Ruby - Gosu](Ruby-Gosu)\
+[Rust - SDL2](Rust-SDL2)\
+[Lua - Love2D](Lua-Love2D)
