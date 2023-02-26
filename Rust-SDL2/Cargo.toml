@@ -1,5 +1,5 @@
 [package]
-name = "rust-sdl2"
+name = "yellow-snow"
 version = "0.1.0"
 edition = "2021"
 
