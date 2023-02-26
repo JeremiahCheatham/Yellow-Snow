@@ -25,7 +25,7 @@ fn main() -> Result<(), String> {
 
     // Create a window
     let mut window: Window = video_subsystem.window(
-        "My Window", SCREEN_WIDTH, SCREEN_HEIGHT)
+        "Don't Eat the Yellow Snow!", SCREEN_WIDTH, SCREEN_HEIGHT)
         .position_centered()
         .build()
         .map_err(|e| e.to_string())?;
