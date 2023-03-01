@@ -1,52 +1,60 @@
 Player = {
-    speed = 300,
-    y = 378,
-    top = 390,
-    leftOffset = 48,
-    rightOffset = 48
+    _speed = 300,
+    _y = 378,
+    _isRight = true,
+    _topOffset = 12,
+    _leftOffset = 47,
+    _rightOffset = 47
 }
 
-function Player:load(image)
-    self.image = love.graphics.newImage(image)
-    self.width, self.height = self.image:getDimensions()
-    self.x = (love.graphics.getWidth() - self.width) / 2
-    self.left = self.x + self.leftOffset
-    self.right = self.x + self.width - self.rightOffset
-end
 
-
-function Player:new()
-    setmetatable(newPlayer, self)
-    self.__index = self
+function Player:new(image)
+    local newPlayer = {}
+    newPlayer._image = image
+    newPlayer._width, newPlayer._height = image:getDimensions()
+    self._x = (love.graphics.getWidth() - newPlayer._width) / 2
+    setmetatable(newPlayer, { __index = self })
     return newPlayer
 end
 
 
 function Player:update(dt)
     if love.keyboard.isDown("left") then
-        self.left = self.left - self.speed * dt
-        if self.left < 0 then
-            self.left = 0
+        self._isRight = false
+        self._x = self._x - self._speed * dt
+        if self:left() < 0 then
+            self._x = -self._leftOffset
         end
-        self.x = self.left - self.leftOffset
-        self.right = self.x + self.width - self.rightOffset
-        self.isRight = false
     end
     if love.keyboard.isDown("right") then
-        self.right = self.right + self.speed * dt
-        if self.right > love.graphics.getWidth() then
-            self.right = love.graphics.getWidth()
+        self._isRight = true
+        self._x = self._x + self._speed * dt
+        if self:right() > love.graphics.getWidth() then
+            self._x = love.graphics.getWidth() + self._rightOffset - self._width
         end
-        self.x = self.right - self.width + self.rightOffset
-        self.left = self.x + self.leftOffset
-        self.isRight = true
     end
 end
 
+
+function Player:left()
+    return self._x + self._leftOffset
+end
+
+
+function Player:right()
+    return self._x + self._width - self._rightOffset
+end
+
+
+function Player:top()
+    return self._y + self._topOffset
+end
+
+
 function Player:draw()
-    if self.isRight then
-        love.graphics.draw(self.image, self.x, self.y, 0, 1, 1)
+    if self._isRight then
+        love.graphics.draw(self._image, self._x, self._y, 0, 1, 1)
     else
-        love.graphics.draw(self.image, self.x + self.width, self.y, 0, -1, 1)
+        love.graphics.draw(self._image, self._x + self._width, self._y, 0, -1, 1)
     end
 end

@@ -1,46 +1,45 @@
 Flake = {
-    speed = 300
+    _speed = 300
 }
 
-function Flake:load(white, yellow)
-    self.__index = self
-    self.white = love.graphics.newImage(white)
-    self.yellow = love.graphics.newImage(yellow)
-    self.width, self.height = self.white:getDimensions()
-end
-
-function Flake:new(color)
+function Flake:new(image, color)
     local newFlake = {}
-    setmetatable(newFlake, self)
-    if color == "white" then
-        newFlake.image = self.white
-        newFlake.color = "white"
-    else
-        newFlake.image = self.yellow
-        newFlake.color = "yellow"
-    end
+    newFlake._image = image
+    newFlake._color = color
+    newFlake._width, newFlake._height = image:getDimensions()
+    setmetatable(newFlake, { __index = self })
     return newFlake
 end
 
-function Flake:reset()
+function Flake:reset(full)
     if Playing then
-        self.y = -self.height - math.random(0, love.graphics.getHeight())
+        self._y = -self._height - math.random(0, love.graphics.getHeight())
     else
-        self.y = -self.height - math.random(0, love.graphics.getHeight() * 2 )
+        self._y = -self._height - math.random(0, love.graphics.getHeight() * 2 )
     end
-    self.x = math.random(0, (love.graphics.getWidth() - self.width))
-    self.left = self.x
-    self.right = self.x + self.width
-    self.top = self.y
-    self.bottom = self.y + self.height
+    self._x = math.random(0, (love.graphics.getWidth() - self._width))
 end
 
 function Flake:update(dt)
-    self.y = self.y + self.speed * dt
-    self.top = self.y
-    self.bottom = self.y + self.height
+    self._y = self._y + self._speed * dt
+end
+
+function Flake:left()
+    return self._x
+end
+
+function Flake:right()
+    return self._x + self._width
+end
+
+function Flake:bottom()
+    return self._y + self._height
+end
+
+function Flake:color()
+    return self._color
 end
 
 function Flake:draw()
-    love.graphics.draw(self.image, self.x, self.y)
+    love.graphics.draw(self._image, self._x, self._y)
 end
