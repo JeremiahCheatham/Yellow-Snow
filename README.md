@@ -14,8 +14,8 @@ Escape - Quits and closes game.
 [C++ - SDL2](Cpp-SDL2)\
 [Haskell - SDL2](Haskell-SDL2)\
 [JavaScript - Canvas2D](JavaScript-Canvas2D)\
+[Lua - Love2D](Lua-Love2D)\
 [Python - PyGame](Python-PyGame)\
 [Python - PyGame Zero](Python-PyGame-Zero)\
 [Ruby - Gosu](Ruby-Gosu)\
-[Rust - SDL2](Rust-SDL2)\
-[Lua - Love2D](Lua-Love2D)
+[Rust - SDL2](Rust-SDL2)
