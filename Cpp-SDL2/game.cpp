@@ -48,7 +48,7 @@ Game::Game() {
     }
 
     //Initialize SDL_mixer
-    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 4096 ) < 0 ) {
+    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 1024 ) < 0 ) {
         TTF_Quit();
         IMG_Quit();
         SDL_DestroyRenderer(this->renderer);
@@ -93,13 +93,13 @@ void Game::init() {
         throw std::runtime_error(error);
     }
 
-    this->collect = Mix_LoadWAV("sounds/collect.wav");
+    this->collect = Mix_LoadWAV("sounds/collect.ogg");
     if(!this->collect) {
         auto error = fmt::format("Failed to load sound effect: {}", Mix_GetError());
         throw std::runtime_error(error);
     }
 
-    this->hit = Mix_LoadWAV("sounds/hit.wav");
+    this->hit = Mix_LoadWAV("sounds/hit.ogg");
     if(!this->hit) {
         auto error = fmt::format("Failed to load sound effect: {}", Mix_GetError());
         throw std::runtime_error(error);
