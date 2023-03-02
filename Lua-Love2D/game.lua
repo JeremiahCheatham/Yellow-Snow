@@ -1,5 +1,7 @@
 Game = {
-    _playing = true
+    playing = true,
+    score = 0,
+    _ground = 550
 }
 
 function Game:load()
@@ -17,9 +19,12 @@ function Game:load()
     self.hit = love.audio.newSource("sounds/hit.ogg", "static")
     self.music = love.audio.newSource("music/winter_loop.ogg", "stream")
 
-    -- Create Player and Score objects.
+    -- Load and set font.
+    self.font = love.graphics.newFont("fonts/freesansbold.ttf", 24)
+    love.graphics.setFont(self.font)
+
+    -- Create Player objects.
     self.player = Player:new(self.playerImage)
-    self.score = Score:new("fonts/freesansbold.ttf", 24)
 
     -- Generate list of flakes.
     self.flakes = {}
@@ -40,7 +45,7 @@ function Game:load()
 end
 
 function Game:update(dt)
-    if self._playing then
+    if self.playing then
         self.player:update(dt)
         for _, flake in pairs(self.flakes) do
             flake:update(dt)
@@ -55,7 +60,7 @@ function Game:draw()
     for _, flake in pairs(self.flakes) do
         flake:draw()
     end
-    self.score:draw()
+    love.graphics.print("Score: " .. math.floor(self.score), 10, 10)
 end
 
 function Game:playing()
@@ -63,26 +68,26 @@ function Game:playing()
 end
 
 function Game:reset()
-    self.score:reset()
+    self.score = 0
     for _, flake in pairs(self.flakes) do
         flake:reset()
     end
-    self._playing = true
+    self.playing = true
     self.music:play()
 end
 
 function Game:checkCollision(flake)
-    if flake:bottom() > 550 then
+    if flake:bottom() > self._ground then
         flake:reset()
     elseif flake:bottom() > self.player:top() and flake:right() > self.player:left() and flake:left() < self.player:right() then
         if flake:color() == "white" then
             self.collect:clone():play()
             flake:reset(false)
-            self.score:increment()
+            self.score = self.score + 1
         else
             self.music:stop()
             self.hit:play()
-            self._playing = false
+            self.playing = false
         end
     end
 end
