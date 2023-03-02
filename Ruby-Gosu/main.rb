@@ -29,8 +29,8 @@ class Game < Gosu::Window
         5.times { @flakes << Flake.new("yellow", @playing) }
 
         # Load sound effects.
-        @collect = Gosu::Sample.new("sounds/collect.wav")
-        @hit = Gosu::Sample.new("sounds/hit.wav")
+        @collect = Gosu::Sample.new("sounds/collect.ogg")
+        @hit = Gosu::Sample.new("sounds/hit.ogg")
 
         # Load and start playing music.
         @music = Gosu::Song.new("music/winter_loop.ogg")
