@@ -1,6 +1,8 @@
 require("gosu")
+require("sdl2")
 require_relative("player")
 require_relative("flake")
+
 
 WIDTH = 800
 HEIGHT = 600
@@ -14,7 +16,7 @@ class Game < Gosu::Window
 
         # Game variables.
         @score = 0
-        @playing = false
+        @playing = true
         @ground = 550
 
         # Load background image.
@@ -25,8 +27,8 @@ class Game < Gosu::Window
 
         # Generate flakes.
         @flakes = []
-        10.times { @flakes << Flake.new("white", @playing) }
-        5.times { @flakes << Flake.new("yellow", @playing) }
+        10.times { @flakes << Flake.new("white", true) }
+        5.times { @flakes << Flake.new("yellow", true) }
 
         # Load sound effects.
         @collect = Gosu::Sample.new("sounds/collect.ogg")
@@ -38,8 +40,6 @@ class Game < Gosu::Window
 
         # Create font.
         @font = Gosu::Font.new(24, options = {name: "fonts/freesansbold.ttf"})
-
-        @playing = true
     end
 
     def update
@@ -72,7 +72,7 @@ class Game < Gosu::Window
             close
         elsif (id == Gosu::KB_SPACE) && !@playing
             @score = 0
-            @flakes.each { |flake| flake.reset(@playing) }
+            @flakes.each { |flake| flake.reset(true) }
             @music.play
             @playing = true
         end
@@ -81,7 +81,7 @@ class Game < Gosu::Window
     def check_collision(flake, player)
         # Reset flake above screen if hitting the ground.
         if flake.bottom > @ground
-            flake.reset(@playing)
+            flake.reset(false)
         # Check flake collision with player. White scores and yellow ends the game.
         elsif flake.bottom > player.top && flake.right > player.left && flake.left < player.right
             if flake.color == "white"

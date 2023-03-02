@@ -22,13 +22,13 @@ class Flake
         @image.draw(@x, @y)
     end
     
-    def reset(running)
+    def reset(full)
         # Reset flake to random position above the screen. Or 2 screens above if game reset.
         @x = rand(WIDTH - @width)
-        if running
-            @y = -@height - rand(HEIGHT)
-        else
+        if full
             @y = -@height - rand(HEIGHT * 2)
+        else
+            @y = -@height - rand(HEIGHT)
         end
         @left = @x
         @right = @x + @width
