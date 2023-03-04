@@ -21,24 +21,32 @@ Game::Game()
 }
 
 void Game::init() {
+
+    Image icon = LoadImage("images/yellow.png");
+    if (!icon.data) {
+        throw std::runtime_error("Failed to load icon Image!");
+    }
+    SetWindowIcon(icon);
+    UnloadImage(icon);
+
     this->backgroundImage = LoadTexture("images/background.png");
     if(this->backgroundImage.id == 0) {
-        throw std::runtime_error("Failed to load backgroundImage texture!");
+        throw std::runtime_error("Failed to load backgroundImage Texture2D!");
     }
 
     this->playerImage = LoadTexture("images/player.png");
     if(this->playerImage.id == 0) {
-        throw std::runtime_error("Failed to load playerImage texture!");
+        throw std::runtime_error("Failed to load playerImage Texture2D!");
     }
 
     this->whiteImage = LoadTexture("images/white.png");
     if(this->whiteImage.id == 0) {
-        throw std::runtime_error("Failed to load whiteImage texture!");
+        throw std::runtime_error("Failed to load whiteImage Texture2D!");
     }
 
     this->yellowImage = LoadTexture("images/yellow.png");
     if(this->yellowImage.id == 0) {
-        throw std::runtime_error("Failed to load yellowImage texture!");
+        throw std::runtime_error("Failed to load yellowImage Texture2D!");
     }
 
     // Load background song
@@ -59,6 +67,9 @@ void Game::init() {
     }
 
     this->font = LoadFontEx("fonts/freesansbold.ttf", 24, nullptr, 0);
+    // if (!font.glyphs) {
+    //     throw std::runtime_error("Failed to load freesansbold Font!");
+    // }
 }
 
 Game::~Game() {
