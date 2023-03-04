@@ -11,6 +11,7 @@ Escape - Quits and closes game.
 
 # Ports
 [C - SDL2](C-SDL2)\
+[C++ - Raylib](Cpp-Raylib)\
 [C++ - SDL2](Cpp-SDL2)\
 [Haskell - SDL2](Haskell-SDL2)\
 [JavaScript - Canvas2D](JavaScript-Canvas2D)\
