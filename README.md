@@ -10,6 +10,7 @@ Space Bar - Resets the Game.\
 Escape - Quits and closes game.
 
 # Ports
+[C - Raylib](C-Raylib)\
 [C - SDL2](C-SDL2)\
 [C++ - Raylib](Cpp-Raylib)\
 [C++ - SDL2](Cpp-SDL2)\
