@@ -28,7 +28,7 @@ void fps_print() {
 }
 
 // Calculate delay needed for the FPS.
-void fps_delay(struct Game *game) {
+float fps_delay(float frame_delay) {
     static float carry_delay = 0;
     static Uint32 last_time = 0;
 
@@ -37,27 +37,27 @@ void fps_delay(struct Game *game) {
     // Checking for roll over
     if (current_time >= last_time) {
         elapsed_time = current_time - last_time;
-        if ((game->frame_delay + carry_delay) > elapsed_time) {
-            unsigned int current_delay = game->frame_delay - elapsed_time + carry_delay;
+        if ((frame_delay + carry_delay) > elapsed_time) {
+            unsigned int current_delay = frame_delay - elapsed_time + carry_delay;
             SDL_Delay(current_delay);
             current_time = SDL_GetTicks();
             // Checking for roll over again.
             if (current_time >= last_time) {
                 elapsed_time = current_time - last_time;
-                carry_delay = game->frame_delay - elapsed_time + carry_delay;
+                carry_delay = frame_delay - elapsed_time + carry_delay;
             } else {
                 carry_delay = 0;
             }
         } else {
-            carry_delay = game->frame_delay - elapsed_time + carry_delay;
+            carry_delay = frame_delay - elapsed_time + carry_delay;
         }
     } else {
         carry_delay = 0;
     }
-    if (carry_delay > game->frame_delay)
-        carry_delay = game->frame_delay;
-    if (carry_delay < -(game->frame_delay))
-        carry_delay = -(game->frame_delay);
+    if (carry_delay > frame_delay)
+        carry_delay = frame_delay;
+    if (carry_delay < -(frame_delay))
+        carry_delay = -(frame_delay);
     last_time = current_time;
-    game->delta_time = elapsed_time / 1000.0f;
+    return elapsed_time / 1000.0f;
 }

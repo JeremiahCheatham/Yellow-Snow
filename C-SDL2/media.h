@@ -1,9 +1,9 @@
 #ifndef MEDIA_H
 #define MEDIA_H
 
-#include "common.h"
+#include "main.h"
+#include "game.h"
 
-enum Errors texts_load(struct Game *game);
-enum Errors audio_load(struct Game *game);
+bool media_load(struct Game *game);
 
 #endif

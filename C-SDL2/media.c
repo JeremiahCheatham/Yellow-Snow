@@ -1,58 +1,55 @@
 #include "media.h"
 
  // Loads image by name and returns texture.
-enum Errors texts_load(struct Game *game) {
-    SDL_Surface* surface = IMG_Load("images/background.png");
-    if (!surface)
-        return ERROR_SURF;
-    game->background = SDL_CreateTextureFromSurface(game->rend, surface);
-    if (!game->background)
-        return ERROR_TEXT;
-    SDL_FreeSurface(surface);
-    surface = NULL;
+bool media_load(struct Game *game) {
 
-    surface = IMG_Load("images/player.png");
-    if (!surface)
-        return ERROR_SURF;
-    game->player = SDL_CreateTextureFromSurface(game->rend, surface);
-    if (!game->player)
-        return ERROR_TEXT;
-    SDL_FreeSurface(surface);
-    surface = NULL;
+    game->background_image = IMG_LoadTexture(game->renderer, "images/background.png");
+    if (!game->background_image) {
+        fprintf(stderr, "Error creating a texture: %s\n", SDL_GetError());
+        return false;
+    }
 
-    surface = IMG_Load("images/white.png");
-    if (!surface)
-        return ERROR_SURF;
-    game->white = SDL_CreateTextureFromSurface(game->rend, surface);
-    if (!game->white)
-        return ERROR_TEXT;
-    SDL_FreeSurface(surface);
-    surface = NULL;
+    game->player_image = IMG_LoadTexture(game->renderer, "images/player.png");
+    if (!game->player_image) {
+        fprintf(stderr, "Error creating a texture: %s\n", SDL_GetError());
+        return false;
+    }
 
-    surface = IMG_Load("images/yellow.png");
-    if (!surface)
-        return ERROR_SURF;
-    game->yellow = SDL_CreateTextureFromSurface(game->rend, surface);
-    if (!game->yellow)
-        return ERROR_TEXT;
-    SDL_FreeSurface(surface);
-    surface = NULL;
+    game->white_image = IMG_LoadTexture(game->renderer, "images/white.png");
+    if (!game->white_image) {
+        fprintf(stderr, "Error creating a texture: %s\n", SDL_GetError());
+        return false;
+    }
 
-    return 0;
-}
+    game->yellow_image = IMG_LoadTexture(game->renderer, "images/yellow.png");
+    if (!game->yellow_image) {
+        fprintf(stderr, "Error creating a texture: %s\n", SDL_GetError());
+        return false;
+    }
 
-enum Errors audio_load(struct Game *game) {
     game->music = Mix_LoadMUS( "music/winter_loop.ogg" );
-    if(!game->music)
-        return ERROR_MUSC;
+    if(!game->music) {
+        fprintf(stderr, "Failed to load music: %s\n", Mix_GetError());
+        return false;
+    }
 
-    game->collect = Mix_LoadWAV("sounds/collect.wav");
-    if(!game->collect)
-        return ERROR_SND;
+    game->collect = Mix_LoadWAV("sounds/collect.ogg");
+    if(!game->collect) {
+        fprintf(stderr, "Failed to load sound effect: %s\n", Mix_GetError());
+        return false;
+    }
 
-    game->hit = Mix_LoadWAV("sounds/hit.wav");
-    if(!game->hit)
-        return ERROR_SND;
+    game->hit = Mix_LoadWAV("sounds/hit.ogg");
+    if(!game->hit) {
+        fprintf(stderr, "Failed to load sound effect: %s\n", Mix_GetError());
+        return false;
+    }
+    
+    game->font = TTF_OpenFont("fonts/freesansbold.ttf", 24);
+    if (!game->font) {
+        fprintf(stderr, "Error creating font: %s\n", TTF_GetError());
+        return false;
+    }
 
-    return 0;
+    return true;
 }
