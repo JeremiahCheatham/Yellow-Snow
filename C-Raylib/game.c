@@ -1,25 +1,21 @@
 // Included header files.
 #include "game.h"
-#include "player.h"
-#include "flake.h"
-#include "score.h"
 
 struct Game* game_new() {
-    struct Game *new_game = calloc(1, sizeof(struct Game));
-    if (!new_game) {
-        fprintf(stderr, "Error in malloc of new_game!\n");
-        return new_game;
+    struct Game *this = calloc(1, sizeof(struct Game));
+    if (!this) {
+        fprintf(stderr, "Error in calloc of new game!\n");
+        return this;
     }
 
-    new_game->ground = 550;
-    new_game->delta_time = 0;
-    new_game->playing = true;
-    new_game->error = 0;
+    this->ground = 550;
+    this->delta_time = 0;
+    this->playing = true;
 
-    new_game->player = NULL;
-    new_game->flakes = NULL;
-    new_game->score = NULL;
-    return new_game;
+    this->player = NULL;
+    this->flakes = NULL;
+    this->score = NULL;
+    return this;
 }
 
 void game_free(struct Game *this) {

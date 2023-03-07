@@ -3,7 +3,6 @@
 
 // Included header files.
 #include "main.h"
-#include "game.h"
 
 bool init_raylib();
 void close_raylib();

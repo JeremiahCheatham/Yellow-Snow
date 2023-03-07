@@ -1,4 +1,5 @@
 #include "init_raylib.h"
+#include "game.h"
 
 bool init_raylib() {
     // Initialize Raylib

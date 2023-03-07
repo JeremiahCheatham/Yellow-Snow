@@ -18,7 +18,6 @@ struct Game {
     int ground;
     float delta_time;
     bool playing;
-    bool error;
     struct Player *player;
     struct Flake *flakes;
     struct Score *score;

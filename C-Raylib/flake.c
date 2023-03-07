@@ -2,7 +2,7 @@
 #include "flake.h"
 
 bool flake_new(struct Flake **flakes, Texture2D *image, bool is_white) {
-    struct Flake *this = malloc(sizeof(struct Flake));
+    struct Flake *this = calloc(1, sizeof(struct Flake));
     if (!this) {
         fprintf(stderr, "Error in calloc of new_flake!\n");
         return false;

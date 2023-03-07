@@ -2,7 +2,7 @@
 #include "player.h"
 
 struct Player* player_new(Texture2D *image) {
-    struct Player *this = malloc(sizeof(struct Player));
+    struct Player *this = calloc(1, sizeof(struct Player));
     if (!this) {
         fprintf(stderr, "Error in calloc of new_player!\n");
         return this;
@@ -11,7 +11,7 @@ struct Player* player_new(Texture2D *image) {
     this->image = image;
     this->x = (WIDTH - image->width) / 2;
 
-    this->isRight = true;
+    this->is_right = true;
     this->y = 378;
     this->speed = 300;
     this->top_offset = 12;
@@ -27,19 +27,19 @@ void player_update(struct Player *this, float delta_time) {
         if (this->x + this->left_offset < 0) {
             this->x = -this->left_offset;
         }
-        this->isRight = false;
+        this->is_right = false;
     }
     if (IsKeyDown(KEY_RIGHT)) {
         this->x += delta_time * this->speed + 0.5;
         if (this->x + this->image->width - this->right_offset > WIDTH) {
             this->x = WIDTH + this->right_offset - this->image->width;
         }
-        this->isRight = true;
+        this->is_right = true;
     }
 }
 
 void player_draw(struct Player *this) {
-    if (this->isRight) {
+    if (this->is_right) {
         DrawTexture(*(this->image), this->x, this->y, WHITE);
     } else {
         DrawTextureRec(*this->image, (Rectangle){0, 0, -this->image->width, this->image->height}, (Vector2){this->x, this->y}, WHITE);

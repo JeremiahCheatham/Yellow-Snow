@@ -15,9 +15,9 @@ struct Score* score_new(Font *font) {
     this->score = 0;
 
     int len = snprintf(NULL, 0, "Score: %d", this->score) + 1;
-    this->score_str = malloc(sizeof(char) * len);
+    this->score_str = calloc(1, sizeof(char) * len);
     if (!this->score_str) {
-        fprintf(stderr, "Error in malloc of score->score_str!\n");
+        fprintf(stderr, "Error in calloc of score->score_str!\n");
         return this; 
     }
     snprintf(this->score_str, len, "Score: %d", this->score);

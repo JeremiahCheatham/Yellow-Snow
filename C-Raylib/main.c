@@ -1,11 +1,14 @@
 // Included header files.
 #include "main.h"
-#include "game.h"
 #include "init_raylib.h"
+#include "game.h"
 #include "media.h"
 
 int main() {
-    if (!init_raylib()) return 1;
+    if (!init_raylib()) {
+        close_raylib();
+        return 1;
+    }
 
     struct Game *game = game_new();
     if (!game) {

@@ -3,11 +3,7 @@
 
 // Included header files.
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <time.h>
 #include <stdlib.h>
 #include "raylib.h"
 
