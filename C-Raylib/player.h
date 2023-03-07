@@ -7,7 +7,7 @@
 struct Player {
     Texture2D *image;
     float x;
-    bool isRight;
+    bool is_right;
     float y;
     unsigned int speed;
     int top_offset;

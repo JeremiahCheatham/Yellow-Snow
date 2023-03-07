@@ -14,7 +14,7 @@ struct Flake {
     bool is_white;
 };
 
-bool flake_new(struct Flake **first_flake, Texture2D *image, bool is_white);
+bool flake_new(struct Flake **flakes, Texture2D *image, bool is_white);
 void flake_update(struct Flake *this, float delta_time);
 void flake_draw(struct Flake *this);
 void flake_reset(struct Flake *this, bool full);
