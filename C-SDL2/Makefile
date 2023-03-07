@@ -9,7 +9,7 @@ OBJS    = $(SRCS:.c=.o)
 .PHONY: all
 all: $(TARGET)
 
-%.o: %.cc
+%.o: %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJS)
