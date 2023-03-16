@@ -218,11 +218,16 @@ main = do
     let myAudioConfig = SDL.Mixer.Audio { SDL.Mixer.audioFrequency = 44100
                                         , SDL.Mixer.audioFormat = SDL.Mixer.FormatS16_LSB
                                         , SDL.Mixer.audioOutput = SDL.Mixer.Stereo }
-    SDL.Mixer.openAudio myAudioConfig 4096
+    SDL.Mixer.openAudio myAudioConfig 1024
 
     -- Create the window and renderer.
     window <- SDL.createWindow "Don't Eat The Yellow Snow!" SDL.defaultWindow
     renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
+
+    -- Set the Window icon to the yellow flake.
+    icon <- SDL.Image.load "images/yellow.png"
+    SDL.setWindowIcon window icon
+    SDL.freeSurface icon
 
     -- Load all images and sounds assets and return GameData record.
     gameData <- createGameData renderer
