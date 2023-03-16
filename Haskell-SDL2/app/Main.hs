@@ -9,30 +9,42 @@ import Foreign.C.Types
 import Control.Monad.State
 import System.Random
 import qualified Data.Text
+import Data.Word (Word32)
 
 
 -- Define a new GameData record.
-data GameData = GameData { gameRenderer :: SDL.Renderer
-                         , gameBackground :: SDL.Texture
-                         , gamePlayer :: SDL.Texture
-                         , gamePlayerDim :: SDL.V2 CInt
-                         , gameWhiteFlake :: SDL.Texture
-                         , gameYellowFlake :: SDL.Texture
-                         , gameFlakeDim :: SDL.V2 CInt
-                         , gameMusic :: SDL.Mixer.Music
-                         , gameCollect :: SDL.Mixer.Chunk
-                         , gameHit :: SDL.Mixer.Chunk }
+data GameData = GameData
+    { gameRenderer :: SDL.Renderer
+    , gameBackground :: SDL.Texture
+    , gamePlayer :: SDL.Texture
+    , gamePlayerDim :: SDL.V2 CInt
+    , gameWhiteFlake :: SDL.Texture
+    , gameYellowFlake :: SDL.Texture
+    , gameFlakeDim :: SDL.V2 CInt
+    , gameMusic :: SDL.Mixer.Music
+    , gameCollect :: SDL.Mixer.Chunk
+    , gameHit :: SDL.Mixer.Chunk
+    , gameFps :: Float
+    , gameFlakeVel :: Float
+    , gamePlayerVel :: Float }
 
 
 -- Define a new GameState record.
-data GameState = GameState { gamePlayerRect :: SDL.Rectangle CInt
-                           , gamePlayerLeft :: Bool
-                           , gameFlakes :: [(SDL.Texture, Bool, SDL.Rectangle CInt)]
-                           , gameCollected :: Int
-                           , gameScore :: Int
-                           , gameScoreTex :: SDL.Texture
-                           , gameScoreRect :: SDL.Rectangle CInt
-                           , gameOver :: Bool }
+data GameState = GameState
+    { gamePlayerRect :: SDL.Rectangle CInt
+    , gamePlayerLeft :: Bool
+    , gameFlakes :: [(SDL.Texture, Bool, SDL.Rectangle CInt)]
+    , gameCollected :: Int
+    , gameScore :: Int
+    , gameScoreTex :: SDL.Texture
+    , gameScoreRect :: SDL.Rectangle CInt
+    , gameOver :: Bool
+    , gameLastTime :: Word32
+    , gameCarryDelay :: Float
+    , gameDeltaTime :: Float
+    , gameFpsTime :: Word32
+    , gameFpsCount :: Word32
+    , gameFpsEnable :: Bool }
 
 
 -- Load an image in as surface. Get dimensions, free surface, return tex and dim.
@@ -55,16 +67,20 @@ createGameData renderer = do
     collect <- SDL.Mixer.load "sounds/collect.wav"
     hit <- SDL.Mixer.load "sounds/hit.wav"
     music <- SDL.Mixer.load "music/winter_loop.mp3"
-    return GameData { gameRenderer = renderer
-                    , gameBackground = background
-                    , gamePlayer = player
-                    , gamePlayerDim = playerDim
-                    , gameWhiteFlake = white
-                    , gameYellowFlake = yellow
-                    , gameFlakeDim = flakeDim
-                    , gameMusic = music
-                    , gameCollect = collect
-                    , gameHit = hit }
+    return GameData
+        { gameRenderer = renderer
+        , gameBackground = background
+        , gamePlayer = player
+        , gamePlayerDim = playerDim
+        , gameWhiteFlake = white
+        , gameYellowFlake = yellow
+        , gameFlakeDim = flakeDim
+        , gameMusic = music
+        , gameCollect = collect
+        , gameHit = hit
+        , gameFps = 1000 / 60
+        , gameFlakeVel = 300
+        , gamePlayerVel = 300 }
 
 
 -- Load all state assets and return GameState record.
@@ -79,14 +95,21 @@ createGameState gameData = do
     whiteFlakes <- sequence (replicate 10 (generateFlake white True flakeDim))
     yellowFlakes <- sequence (replicate 5 (generateFlake yellow False flakeDim))
     (scoreTex, scoreRect) <- generateMsg renderer 10 10 ("Score: 0") 24
-    return GameState { gamePlayerRect = playerRect
-                     , gamePlayerLeft = False
-                     , gameFlakes = whiteFlakes ++ yellowFlakes
-                     , gameCollected = 0
-                     , gameScore = 0
-                     , gameScoreTex = scoreTex
-                     , gameScoreRect = scoreRect
-                     , gameOver = False }
+    return GameState
+        { gamePlayerRect = playerRect
+        , gamePlayerLeft = False
+        , gameFlakes = whiteFlakes ++ yellowFlakes
+        , gameCollected = 0
+        , gameScore = 0
+        , gameScoreTex = scoreTex
+        , gameScoreRect = scoreRect
+        , gameOver = False
+        , gameLastTime = 0
+        , gameCarryDelay = 0
+        , gameDeltaTime = 0
+        , gameFpsTime = 0
+        , gameFpsCount = 0
+        , gameFpsEnable = False }
 
 
 -- Generate a flake 2 screens above window.
@@ -115,8 +138,8 @@ generateMsg renderer x y msg size = do
 
 
 -- Check the direction keys if they are in the down state and return the updated player position
-checkKeysDown :: SDL.Rectangle CInt -> (SDL.Scancode -> Bool) -> Bool -> (SDL.Rectangle CInt, Bool)
-checkKeysDown playerRect keyboardState leftBool = do
+checkKeysDown :: SDL.Rectangle CInt -> (SDL.Scancode -> Bool) -> Bool -> Float -> Float -> (SDL.Rectangle CInt, Bool)
+checkKeysDown playerRect keyboardState leftBool velX deltaTime = do
     -- Get bool for each key thats down.
     let leftPressed = keyboardState SDL.ScancodeLeft
     let rightPressed = keyboardState SDL.ScancodeRight
@@ -130,8 +153,8 @@ checkKeysDown playerRect keyboardState leftBool = do
                     else leftBool
 
     -- Update the x and y position.
-    let x = if leftPressed && not rightPressed then oldX - 5
-            else if rightPressed && not leftPressed then oldX + 5
+    let x = if leftPressed && not rightPressed then oldX - round (velX * deltaTime)
+            else if rightPressed && not leftPressed then oldX + round (velX * deltaTime)
             else oldX
 
     -- Check bounds and update x and y.
@@ -146,16 +169,17 @@ checkKeysDown playerRect keyboardState leftBool = do
 -- Check all the events and return whether escape or space are pressed.
 checkKeysPressed :: [SDL.Event] -> (Bool, Bool)
 checkKeysPressed events = foldr checkKey (False, False) events
-    where checkKey event (escape, space) =
+    where checkKey event (quit, space) =
             case SDL.eventPayload event of
                 SDL.KeyboardEvent keyboardEvent ->
                     if SDL.keyboardEventKeyMotion keyboardEvent == SDL.Pressed then
                         case SDL.keysymKeycode (SDL.keyboardEventKeysym keyboardEvent) of
                             SDL.KeycodeEscape -> (True, space)
-                            SDL.KeycodeSpace -> (escape, True)
-                            _ -> (escape, space)
-                    else (escape, space)
-                _ -> (escape, space)
+                            SDL.KeycodeSpace -> (quit, True)
+                            _ -> (quit, space)
+                    else (quit, space)
+                SDL.QuitEvent -> (True, space)
+                _ -> (quit, space)
 
 
 -- Free all asset memory and shutdown SDL.
@@ -217,32 +241,33 @@ main = do
 
 
 -- Update all Flakes keeping track of white flakes collected and if a yellow flake was hit.
-updateFlakes :: [(SDL.Texture, Bool, SDL.Rectangle CInt)] -> SDL.V2 CInt -> Int -> Bool-> IO ([(SDL.Texture, Bool, SDL.Rectangle CInt)], Int, Bool)
-updateFlakes [] _ collected over = return ([], collected, over)
-updateFlakes (x:xs) playerPos collected over = do
-    (flake, newCollected, newOver) <- updateFlake x playerPos
-    (flakes, finalCollected, finalOver) <- updateFlakes xs playerPos (newCollected + collected) (newOver || over)
+updateFlakes :: [(SDL.Texture, Bool, SDL.Rectangle CInt)] -> SDL.V2 CInt -> Int -> Bool -> Float -> Float -> IO ([(SDL.Texture, Bool, SDL.Rectangle CInt)], Int, Bool)
+updateFlakes [] _ collected over _ _ = return ([], collected, over)
+updateFlakes (x:xs) playerPos collected over velY deltaTime = do
+    (flake, newCollected, newOver) <- updateFlake x playerPos velY deltaTime
+    (flakes, finalCollected, finalOver) <- updateFlakes xs playerPos (newCollected + collected) (newOver || over) velY deltaTime
     return (flake : flakes, finalCollected, finalOver)
 
 
 -- Update a falling flake. If it his the ground reset above the screen, else check if collided with player.
-updateFlake :: (SDL.Texture, Bool, SDL.Rectangle CInt) -> SDL.V2 CInt -> IO ((SDL.Texture, Bool, SDL.Rectangle CInt), Int, Bool)
-updateFlake (tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x y)) (SDL.V2 w h))) (SDL.V2 playerX _ ) = do
-    (x', y', s, o) <-
-        if y + 5 > 520 then do
+updateFlake :: (SDL.Texture, Bool, SDL.Rectangle CInt) -> SDL.V2 CInt -> Float -> Float -> IO ((SDL.Texture, Bool, SDL.Rectangle CInt), Int, Bool)
+updateFlake (tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x y)) (SDL.V2 w h))) (SDL.V2 playerX _ ) velY deltaTime = do
+    let y' = y + round ( velY * deltaTime )
+    (x', y'', s, o) <-
+        if y' > 520 then do
             numX <- randomRIO (0, 800 - w)
             numY <- randomRIO (0, 600)
             let numY' = (-numY) - h
             return (numX, numY', 0, False)
-        else if y + 5 > 354 && x > (playerX + 10) && x < (playerX + 100) then
+        else if y' > 354 && x > (playerX + 10) && x < (playerX + 100) then
             if color then do
                 numX <- randomRIO (0, 800 - w)
                 numY <- randomRIO (0, 600)
                 let numY' = (-numY) - h
                 return (numX, numY', 1, False)
-            else return (x, y + 5, 0, True)
-        else return (x, y + 5, 0, False)
-    return ((tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x' y')) (SDL.V2 w h))), s, o)
+            else return (x, y', 0, True)
+        else return (x, y', 0, False)
+    return ((tex, color, (SDL.Rectangle (SDL.P (SDL.V2 x' y'')) (SDL.V2 w h))), s, o)
 
 
 -- Resets all flakes somewhere 2 screens above the window. For game reset.
@@ -272,23 +297,25 @@ resetGame renderer music = do
 
 
 -- Get current state of keyboard and update position and direction facing.
-updatePlayer :: StateT GameState IO ()
-updatePlayer = do
+updatePlayer :: Float -> StateT GameState IO ()
+updatePlayer velX = do
     keyboardState <- SDL.getKeyboardState
     gameState <- get
     let oldPlayerRect = gamePlayerRect gameState
         oldPlayerLeft = gamePlayerLeft gameState
-    let (newPlayerRect, newPlayerLeft) = checkKeysDown oldPlayerRect keyboardState oldPlayerLeft
+        deltaTime = gameDeltaTime gameState
+    let (newPlayerRect, newPlayerLeft) = checkKeysDown oldPlayerRect keyboardState oldPlayerLeft velX deltaTime
     put gameState { gamePlayerRect = newPlayerRect, gamePlayerLeft = newPlayerLeft }
 
 
 -- Only update flakes if game is not over.
-checkCollision :: SDL.Mixer.Chunk -> StateT GameState IO ()
-checkCollision hit = do
+checkCollision :: SDL.Mixer.Chunk -> Float -> StateT GameState IO ()
+checkCollision hit velY = do
     gameState <- get
-    let oldFlakes = gameFlakes gameState
+    let deltaTime = gameDeltaTime gameState
+        oldFlakes = gameFlakes gameState
         (SDL.Rectangle (SDL.P playerPos) _ ) = gamePlayerRect gameState
-    (newFlakes, newCollected, newOver) <- liftIO $ updateFlakes oldFlakes playerPos 0 False
+    (newFlakes, newCollected, newOver) <- liftIO $ updateFlakes oldFlakes playerPos 0 False velY deltaTime
     when newOver $ do
         SDL.Mixer.haltMusic
         SDL.Mixer.play hit
@@ -341,6 +368,57 @@ drawEverything gameData = do
     SDL.present renderer
 
 
+fpsPrint :: StateT GameState IO ()
+fpsPrint = do
+    gameState <- get
+    when (gameFpsEnable gameState) $ do
+        let fpsTime = gameFpsTime gameState
+            fpsCount = gameFpsCount gameState
+        currentTime <- SDL.ticks
+        (newTime, newCount) <-
+            if (currentTime >= fpsTime ) then do
+                if ((currentTime - 1000) > fpsTime) then do
+                    liftIO $ putStrLn $ show fpsCount
+                    return (fpsTime + 1000, 1)
+                else 
+                    return (fpsTime , fpsCount + 1)
+            else return (fpsTime, fpsCount + 1)
+        put gameState { gameFpsTime = newTime, gameFpsCount = newCount }
+
+
+fpsDelay :: Float -> StateT GameState IO ()
+fpsDelay frameDelay = do
+    gameState <- get
+    let lastTime = gameLastTime gameState
+        carryDelay = gameCarryDelay gameState
+    
+    firstTime <- SDL.ticks
+    (newCarryDelay, newTime, newElapsedTime) <-
+        if (firstTime >= lastTime) then do
+            let elapsedTime = fromIntegral (firstTime - lastTime)
+            if ((frameDelay + carryDelay) > elapsedTime) then do
+                let delay = frameDelay - elapsedTime + carryDelay
+                SDL.delay $ round delay
+                secondTime <- SDL.ticks
+                if (secondTime >= lastTime) then do
+                    let secondElapsedTime = fromIntegral (secondTime - lastTime)
+                    return ((frameDelay - secondElapsedTime + carryDelay), secondTime, secondElapsedTime)
+                else return (0, secondTime, elapsedTime)
+            else return ((frameDelay - elapsedTime + carryDelay), firstTime, elapsedTime)
+        else return (0, firstTime, 0)
+
+    let newCarryDelay' =
+            if (newCarryDelay > frameDelay) then frameDelay
+            else if (newCarryDelay < (-frameDelay)) then (-frameDelay)
+            else newCarryDelay
+    
+    let deltaTime = newElapsedTime / 1000
+
+    put gameState { gameLastTime = newTime
+                  , gameCarryDelay = newCarryDelay'
+                  , gameDeltaTime = deltaTime }
+
+
 -- Main game loop using gameState.
 gameLoop :: GameData -> StateT GameState IO ()
 gameLoop gameData = do
@@ -350,19 +428,19 @@ gameLoop gameData = do
 
     -- Get current events and check for key pressed events.
     events <- SDL.pollEvents
-    let (escapePressed, spacePressed) = ( checkKeysPressed events )
+    let (quitRequest, spacePressed) = ( checkKeysPressed events )
 
     if over then do
         when spacePressed $ resetGame (gameRenderer gameData) (gameMusic gameData)
     else do
-        updatePlayer
-        checkCollision $ gameHit gameData
+        updatePlayer (gamePlayerVel gameData)
+        checkCollision (gameHit gameData) (gameFlakeVel gameData)
         updateScore (gameRenderer gameData) (gameCollect gameData)
 
     drawEverything gameData
 
-    -- Appoximate 60FPS with a 16ms delay.
-    SDL.delay 16
+    fpsPrint
+    fpsDelay $ gameFps gameData
 
     -- Loop unless escaped pressed.
-    unless escapePressed (gameLoop gameData)
+    unless quitRequest (gameLoop gameData)
