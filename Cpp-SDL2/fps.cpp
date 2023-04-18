@@ -2,10 +2,10 @@
 #include <thread>
 
 Fps::Fps(double target_fps) 
-    : target_frame_duration(1000.0 / target_fps)
-    , last_frame_time(std::chrono::steady_clock::now())
-    , carry_delay(0) {
-}
+    : target_frame_duration{1000.0 / target_fps},
+      last_frame_time{std::chrono::steady_clock::now()},
+      carry_delay{0}
+{}
 
 void Fps::update() {
     this->current_time = std::chrono::steady_clock::now();
@@ -26,5 +26,3 @@ void Fps::update() {
         this->carry_delay = -(this->target_frame_duration);
     this->last_frame_time = this->current_time;
 }
-
-double Fps::delta_time() const { return this->elapsed_time_second.count() / 1000; }

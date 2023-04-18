@@ -5,8 +5,7 @@
 
 class Player {
 public:
-    Player(SDL_Renderer* renderer);
-    ~Player();
+    Player(std::shared_ptr<SDL_Renderer> renderer);
 
     void update(double delta_time);
     void draw();
@@ -18,15 +17,15 @@ public:
     inline void set_right(int right) { this->rect.x = right - this->rect.w + this->right_offset; }
 
 private:
-    SDL_Renderer* renderer = nullptr;
-    SDL_Texture* image = nullptr;
+    std::shared_ptr<SDL_Renderer> renderer;
+    std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> image;
     SDL_Rect rect;
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
-    const unsigned int y = 374;
-    const unsigned int speed = 300;
-    const int top_offset = 16;
-    const int left_offset = 47;
-    const int right_offset = 43;
+    SDL_RendererFlip flip;
+    const unsigned int y;
+    const unsigned int speed;
+    const int top_offset;
+    const int left_offset;
+    const int right_offset;
     const Uint8 *keystate;
 };
 

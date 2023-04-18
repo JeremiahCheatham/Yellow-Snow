@@ -9,7 +9,8 @@ public:
     explicit Fps(double target_fps);
 
     void update();
-    double delta_time() const;
+    
+    inline double delta_time() const { return this->elapsed_time_second.count() / 1000; }
 
 private:
     const std::chrono::duration<double, std::milli> target_frame_duration;

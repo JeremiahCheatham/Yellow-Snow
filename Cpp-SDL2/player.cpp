@@ -1,18 +1,25 @@
 #include "player.h"
 #include "game.h"
 
-Player::Player(SDL_Renderer* renderer)
-    : renderer(renderer) {
+Player::Player(std::shared_ptr<SDL_Renderer> renderer)
+    : renderer{renderer},
+      image{nullptr, SDL_DestroyTexture},
+      flip{SDL_FLIP_NONE},
+      y{374},
+      speed{300},
+      top_offset{16},
+      left_offset{47},
+      right_offset{43}
+{
 
-    this->image = IMG_LoadTexture(renderer, "images/player.png");
+    this->image.reset(IMG_LoadTexture(this->renderer.get(), "images/player.png"));
     if (!this->image) {
         auto error = fmt::format("Error creating a texture: {}", SDL_GetError());
         throw std::runtime_error(error);
     }
 
     // Get a rect from the image.
-    if (SDL_QueryTexture(this->image, nullptr, nullptr, &this->rect.w, &this->rect.h)) {
-        SDL_DestroyTexture(this->image);
+    if (SDL_QueryTexture(this->image.get(), nullptr, nullptr, &this->rect.w, &this->rect.h)) {
         auto error = fmt::format("Error while querying texture: {}", SDL_GetError());
         throw std::runtime_error(error);
     }
@@ -20,10 +27,6 @@ Player::Player(SDL_Renderer* renderer)
     this->keystate = SDL_GetKeyboardState(nullptr);
     this->rect.y = this->y;
     this->rect.x = (Game::width - this->rect.w) / 2;
-}
-
-Player::~Player() {
-    SDL_DestroyTexture(this->image);
 }
 
 void Player::update(double delta_time) {
@@ -44,7 +47,7 @@ void Player::update(double delta_time) {
 }
 
 void Player::draw() {
-    if (SDL_RenderCopyEx(this->renderer, this->image, nullptr, &this->rect, 0, nullptr, this->flip)) {
+    if (SDL_RenderCopyEx(this->renderer.get(), this->image.get(), nullptr, &this->rect, 0, nullptr, this->flip)) {
         auto error = fmt::format("Error while rendering texture: {}", SDL_GetError());
         throw std::runtime_error(error);
     }

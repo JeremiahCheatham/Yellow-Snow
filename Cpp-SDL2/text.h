@@ -5,20 +5,17 @@
 
 class Text {
 public:
-    Text(SDL_Renderer* renderer);
-    ~Text();
+    Text(std::shared_ptr<SDL_Renderer> renderer);
 
     void update(int num);
     void draw();
 
 private:
-    SDL_Renderer* renderer = nullptr;
-    SDL_Texture* image = nullptr;
+    std::shared_ptr<SDL_Renderer> renderer;
+    std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> image;
+    std::unique_ptr<TTF_Font, decltype(&TTF_CloseFont)> font;
     SDL_Rect rect;
-    SDL_Color color = {255, 255, 255, 255};
-    TTF_Font* font = TTF_OpenFont("fonts/freesansbold.ttf", 24);
-    const int x = 10;
-    const int y = 10;
+    SDL_Color color;
 };
 
 #endif // TEXT_H

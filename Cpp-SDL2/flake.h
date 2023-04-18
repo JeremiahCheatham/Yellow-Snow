@@ -5,7 +5,10 @@
 
 class Flake {
 public:
-    Flake(SDL_Renderer* renderer, SDL_Texture* image, bool white, std::mt19937& gen);
+    Flake(std::shared_ptr<SDL_Renderer> renderer,
+          std::shared_ptr<SDL_Texture> image,
+          bool white,
+          std::mt19937& gen);
 
     void update(double delta_time);
     void draw();
@@ -17,11 +20,11 @@ public:
     inline bool is_white() const { return this->white; }
 
 private:
-    SDL_Renderer* renderer = nullptr;
-    SDL_Texture* image = nullptr;
+    std::shared_ptr<SDL_Renderer> renderer;
+    std::shared_ptr<SDL_Texture> image;
     SDL_Rect rect;
     bool white;
-    const unsigned int speed = 300;
+    const unsigned int speed;
     std::mt19937& gen;
 };
 

@@ -7,6 +7,7 @@
 #include <SDL2/SDL_mixer.h>
 #include <vector>
 #include <string>
+#include <memory>
 #include <iostream>
 #include <stdexcept>
 #include <fmt/format.h>

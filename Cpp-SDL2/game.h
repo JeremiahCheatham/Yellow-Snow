@@ -17,16 +17,16 @@ public:
     bool playing = true;
 
 private:
-    const char* title = "Don't Eat the Yellow Snow!";
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
-    SDL_Texture* background = nullptr;
-    SDL_Texture* white = nullptr;
-    SDL_Texture* yellow = nullptr;
-    Mix_Music* music = nullptr;
-    Mix_Chunk* collect = nullptr;
-    Mix_Chunk* hit = nullptr;
-    const int ground = 550;
+    const std::string title;
+    std::shared_ptr<SDL_Window> window;
+    std::shared_ptr<SDL_Renderer> renderer;
+    std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> background;
+    std::shared_ptr<SDL_Texture> white;
+    std::shared_ptr<SDL_Texture> yellow;
+    std::unique_ptr<Mix_Music, decltype(&Mix_FreeMusic)> music;
+    std::unique_ptr<Mix_Chunk, decltype(&Mix_FreeChunk)> collect;
+    std::unique_ptr<Mix_Chunk, decltype(&Mix_FreeChunk)> hit;
+    const int ground;
 };
 
 #endif // GAME_H

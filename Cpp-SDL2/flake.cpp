@@ -1,10 +1,18 @@
 #include "flake.h"
 #include "game.h"
 
-Flake::Flake(SDL_Renderer* renderer, SDL_Texture* image, bool white, std::mt19937& gen)
-    : renderer(renderer), image(image), white(white), gen(gen) {
+Flake::Flake(std::shared_ptr<SDL_Renderer> renderer,
+             std::shared_ptr<SDL_Texture> image,
+             bool white,
+             std::mt19937& gen)
+    : renderer{renderer},
+      image{image},
+      white{white},
+      speed{300},
+      gen{gen}
+{
 
-    if (SDL_QueryTexture(this->image, nullptr, nullptr, &this->rect.w, &this->rect.h)) {
+    if (SDL_QueryTexture(this->image.get(), nullptr, nullptr, &this->rect.w, &this->rect.h)) {
         auto error = fmt::format("Error while querying texture: {}", SDL_GetError());
         throw std::runtime_error(error);
     }
@@ -27,7 +35,7 @@ void Flake::reset(bool full) {
 }
 
 void Flake::draw() {
-    if (SDL_RenderCopy(this->renderer, this->image, nullptr, &this->rect)) {
+    if (SDL_RenderCopy(this->renderer.get(), this->image.get(), nullptr, &this->rect)) {
         auto error = fmt::format("Error while rendering texture: {}", SDL_GetError());
         throw std::runtime_error(error);
     }
