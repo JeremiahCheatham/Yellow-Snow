@@ -2,6 +2,10 @@
 #define GAME_H
 
 #include "main.h"
+#include "player.h"
+#include "flake.h"
+#include "text.h"
+#include "fps.h"
 
 class Game {
 public:
@@ -11,10 +15,10 @@ public:
     void init();
     void run();
 
-    static constexpr int width = 800;
-    static constexpr int height = 600;
-    unsigned int score = 0;
-    bool playing = true;
+    static constexpr int width{800};
+    static constexpr int height{600};
+    unsigned int score;
+    bool playing;
 
 private:
     const std::string title;
@@ -26,6 +30,12 @@ private:
     std::unique_ptr<Mix_Music, decltype(&Mix_FreeMusic)> music;
     std::unique_ptr<Mix_Chunk, decltype(&Mix_FreeChunk)> collect;
     std::unique_ptr<Mix_Chunk, decltype(&Mix_FreeChunk)> hit;
+    std::unique_ptr<Player> player;
+    std::unique_ptr<Text> text;
+    std::unique_ptr<Fps> fps;
+    std::random_device rd;
+    std::mt19937 gen;
+    std::vector<std::unique_ptr<Flake>> flakes;
     const int ground;
 };
 

@@ -1,12 +1,9 @@
 #include "game.h"
-#include "player.h"
-#include "flake.h"
-#include "text.h"
-#include "fps.h"
-
 
 Game::Game()
-    : title{"Don't Eat the Yellow Snow!"},
+    : score{0},
+      playing{true},
+      title{"Don't Eat the Yellow Snow!"},
       window{nullptr, SDL_DestroyWindow},
       renderer{nullptr, SDL_DestroyRenderer},
       background{nullptr, SDL_DestroyTexture},
@@ -15,6 +12,11 @@ Game::Game()
       music{nullptr, Mix_FreeMusic},
       collect{nullptr, Mix_FreeChunk},
       hit{nullptr, Mix_FreeChunk},
+      player{nullptr},
+      text{nullptr},
+      fps{nullptr},
+      rd{},
+      gen{rd()},
       ground{550}
 {
     // Initialize SDL2
@@ -109,9 +111,25 @@ void Game::init() {
         auto error = fmt::format("Failed to load sound effect: {}", Mix_GetError());
         throw std::runtime_error(error);
     }
+
+    // Create the player, text and fps objects
+    this->player.reset(new Player(this->renderer));
+    this->text.reset(new Text(this->renderer));
+    this->fps.reset(new Fps(60));
+
+    for (int i = 0; i < 10; i++) {
+        this->flakes.emplace_back(std::make_unique<Flake>(this->renderer, this->white, true, this->gen));
+    }
+    for (int i = 0; i < 5; i++) {
+        this->flakes.emplace_back(std::make_unique<Flake>(this->renderer, this->yellow, false, this->gen));
+    }
 }
 
 Game::~Game() {
+    // Destroy the unique pointers
+    this->player.reset();
+    this->text.reset();
+
     // Clean up SDL_mixer, SDL_ttf, SDL_image and SDL2.
     Mix_CloseAudio();
     Mix_Quit();
@@ -123,23 +141,6 @@ Game::~Game() {
 void Game::run() {
     //Play the music
     Mix_PlayMusic(this->music.get(), -1);
-
-    Player player(this->renderer);
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    std::vector<Flake> flakes;
-    for (int i = 0; i < 10; i++) {
-        flakes.emplace_back(this->renderer, this->white, true, gen);
-    }
-        for (int i = 0; i < 5; i++) {
-        flakes.emplace_back(this->renderer, this->yellow, false, gen);
-    }
-
-    Text text(this->renderer);
-
-    Fps fps(60);
 
     // Main game loop
     while (true) {
@@ -156,11 +157,11 @@ void Game::run() {
                     case SDL_SCANCODE_SPACE:
                         if (!this->playing) {
                             this->score = 0;
-                            text.update(this->score);
+                            this->text->update(this->score);
                             this->playing = true;
                             Mix_PlayMusic(this->music.get(), -1);
-                            for (auto& flake : flakes) {
-                                flake.reset(true);
+                            for (auto& flake : this->flakes) {
+                                flake->reset(true);
                             }
                         }
                         break;
@@ -171,19 +172,18 @@ void Game::run() {
         }
 
         if (this->playing) {
-            player.update(fps.delta_time());
-            for (auto& flake : flakes) {
-                flake.update(fps.delta_time());
+            this->player->update(this->fps->delta_time());
+            for (auto& flake : this->flakes) {
+                flake->update(this->fps->delta_time());
 
-                if (flake.bottom() > this->ground) {
-                    flake.reset(false);
-                } else if (flake.bottom() > player.top() && flake.right() > player.left() && flake.left() < player.right()) {
-                    if (flake.is_white()) {
+                if (flake->bottom() > this->ground) {
+                    flake->reset(false);
+                } else if (flake->bottom() > this->player->top() && flake->right() > this->player->left() && flake->left() < this->player->right()) {
+                    if (flake->is_white()) {
                         Mix_PlayChannel(-1, this->collect.get(), 0);
-                        flake.reset(false);
+                        flake->reset(false);
                         this->score++;
-                        text.update(this->score);
-                        // game.exit_status = text_update(&text);
+                        this->text->update(this->score);
                     } else {
                         Mix_HaltMusic();
                         Mix_PlayChannel(-1, this->hit.get(), 0);
@@ -202,16 +202,16 @@ void Game::run() {
             throw std::runtime_error(error);
         }
 
-        player.draw();
-        for (auto& flake : flakes) {
-            flake.draw();
+        this->player->draw();
+        for (auto& flake : this->flakes) {
+            flake->draw();
         }
 
-        text.draw();
+        this->text->draw();
 
         // Present the screen
         SDL_RenderPresent(this->renderer.get());
 
-        fps.update();
+        this->fps->update();
     }
 }

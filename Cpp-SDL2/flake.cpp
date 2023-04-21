@@ -29,7 +29,7 @@ void Flake::reset(bool full) {
 
     int height = full ? Game::height * 2 : Game::height;
     std::uniform_int_distribution<int> randy(0, height);
- 
+
     this->rect.x = randx(this->gen);
     this->rect.y = -randy(this->gen) - this->rect.h;
 }
