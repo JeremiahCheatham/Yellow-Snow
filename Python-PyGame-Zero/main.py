@@ -11,7 +11,7 @@ HEIGHT = 600
 GROUND = 550
 TITLE = "Don't Eat The Yellow Snow!"
 ICON = "images/yellow.png"
-MUSIC = "winter_loop.ogg"
+MUSIC = "winter_loop"
 
 
 # Game Variables.
