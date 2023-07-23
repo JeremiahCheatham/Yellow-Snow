@@ -1,8 +1,6 @@
 require("gosu")
-require("sdl2")
 require_relative("player")
 require_relative("flake")
-
 
 WIDTH = 800
 HEIGHT = 600
