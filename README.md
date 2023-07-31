@@ -14,6 +14,7 @@ Escape - Quits and closes game.
 [C - SDL2](C-SDL2)\
 [C++ - Raylib](Cpp-Raylib)\
 [C++ - SDL2](Cpp-SDL2)\
+[Go - SDL2](Go-SDL2)\
 [Haskell - SDL2](Haskell-SDL2)\
 [JavaScript - Canvas2D](JavaScript-Canvas2D)\
 [Lua - Love2D](Lua-Love2D)\
