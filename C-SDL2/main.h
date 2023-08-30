@@ -1,22 +1,24 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-// Included header files.
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 
-// Define directives for constants.
-#define MY_SDL_FLAGS (SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_AUDIO)
-#define TITLE "Don't Eat the Yellow Snow!"
-#define ICON "images/yellow.png"
-#define WIDTH 800
-#define HEIGHT 600
-#define FPS 60
-#define SHOW_FPS false
+#define SDL_FLAGS (SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_AUDIO)
+#define WINDOW_TITLE "Don't Eat the Yellow Snow!"
+#define WINDOW_ICON "images/yellow.png"
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define TARGET_FPS 60
+#define FONT_SIZE 24
 
-#endif // MAIN_H
+// Length of array macro.
+#define LEN(x) (sizeof(x)/sizeof(x[0]))
+
+#endif

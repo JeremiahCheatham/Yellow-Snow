@@ -1,67 +1,92 @@
 #include "flake.h"
 
-struct Flake* flake_new(struct Flake **flakes, SDL_Renderer *renderer, SDL_Texture *image, bool is_white) {
-    struct Flake *this = calloc(1, sizeof(struct Flake));
-    if (!this) {
-        fprintf(stderr, "Error in calloc of flake!\n");
-        return this;
+bool flake_new(struct Flake **flakes, SDL_Renderer *renderer, SDL_Texture *image, bool is_white) {
+
+    struct Flake *new_flake = calloc(1, sizeof(struct Flake));
+    if (!new_flake) {
+        fprintf(stderr, "Error in calloc of new flake!\n");
+        return true;
     }
 
-    this->renderer = renderer;
-    this->image = image;
-
-    // Make this new flake the new had of the linked list.
-    if (*flakes) {
-        this->next = *flakes;
-    } else {
-        this->next = NULL;
-    }
-    *flakes = this;
-
-    // Populate the flake rect width and height
-    if (SDL_QueryTexture(image, NULL, NULL, &this->rect.w, &this->rect.h)) {
+    if (SDL_QueryTexture(image, NULL, NULL, &new_flake->rect.w, &new_flake->rect.h)) {
         fprintf(stderr, "Error while querying texture: %s\n", SDL_GetError());
-        this->error = true;
-        return this;
+        return true;
     }
+    
+    new_flake->renderer = renderer;
+    new_flake->image = image;
+    new_flake->is_white = is_white;
+    new_flake->speed = 300;
 
-    this->is_white = is_white;
-    this->speed = 300;
+    flake_reset(new_flake, true);
 
-    // Set the flake to a random location.
-    flake_reset(this, true);
-
-    this->error = false;
-    return this;
-}
-
-void flake_update(struct Flake *this, float delta_time) {
-    this->y += this->speed * delta_time + 0.5;
-    this->rect.y = this->y;
-}
-
-bool flake_draw(struct Flake *this) {
-    if (SDL_RenderCopy(this->renderer, this->image, NULL, &this->rect)) {
-        fprintf(stderr, "Error while rendering texture: %s\n", SDL_GetError());
-        return false;
+    if (*flakes) {
+        new_flake->next = *flakes;
+    } else {
+        new_flake->next = NULL;
     }
-    return true;
-}
+    *flakes = new_flake;
 
-bool flake_check_collide(SDL_Rect *flake, SDL_Rect *player) {
-    if (flake->y + flake->h > player->y) {
-        if (flake->x + flake->w > player->x) {
-            if (flake->x < player->x + player->w) {
-                return true;
-            }
-        }
-    }
     return false;
 }
 
-void flake_reset(struct Flake *this, bool full) {
-    int height = full ? HEIGHT * 2 : HEIGHT;
-    this->rect.x = (rand() % (WIDTH - this->rect.w));
-    this->rect.y = -((rand() % height) + this->rect.h);
-    this->y = this->rect.y;
+void flakes_free(struct Flake **flakes) {
+    struct Flake *f = *flakes;
+    while (f) {
+        f->image =  NULL;
+        f->renderer = NULL;
+        struct Flake *next = f->next;
+        free(f);
+        f = next;
+    }
+    *flakes = NULL;
+}
+
+void flake_reset(struct Flake *f, bool full) {
+    int height = full ? WINDOW_HEIGHT * 2 : WINDOW_HEIGHT;
+    f->rect.x = (rand() % (WINDOW_WIDTH - f->rect.w));
+    f->rect.y = -((rand() % height) + f->rect.h);
+    f->y_pos = f->rect.y;
+}
+
+void flakes_reset(struct Flake *f, bool full) {
+    while (f) {
+        flake_reset(f, full);
+        f = f->next;
+    }
+}
+
+int flake_left(struct Flake *f) {
+    return f->rect.x;
+}
+
+int flake_right(struct Flake *f) {
+    return f->rect.x + f->rect.w;
+}
+
+int flake_bottom(struct Flake *f) {
+    return f->rect.y + f->rect.h;
+}
+
+void flakes_update(struct Flake *f, double dt) {
+    while (f) {
+        f->y_pos += f->speed * dt;
+        if (f->y_pos > 514) {
+            flake_reset(f, false);
+        } else {
+            f->rect.y = (int)(f->y_pos + 0.5);
+        }
+        f = f->next;
+    }
+}
+
+bool flakes_draw(struct Flake *f) {
+    while (f) {
+        if (SDL_RenderCopy(f->renderer, f->image, NULL, &f->rect)) {
+            fprintf(stderr, "Error while rendering texture: %s\n", SDL_GetError());
+            return true;
+        }
+        f = f->next;
+    }
+    return false;
 }

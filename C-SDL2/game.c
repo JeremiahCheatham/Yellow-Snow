@@ -1,188 +1,206 @@
-// Included header files.
 #include "game.h"
-#include "fps.h"
+#include "initialize.h"
+#include "load_media.h"
 
-struct Game* game_new(SDL_Renderer *renderer) {
-    struct Game *this = calloc(1, sizeof(struct Game));
-    if (!this) {
-        fprintf(stderr, "Error in malloc of game!\n");
-        return this;
+bool game_new(struct Game **game) {
+    *game = calloc(1, sizeof(struct Game));
+    if (*game == NULL) {
+        fprintf(stderr, "Error in calloc of new game.\n");
+        return true;
+    }
+    struct Game *g = *game;
+
+    if (game_initilize(g)) {
+        return true;
     }
 
-    this->renderer = renderer;
-    this->ground = 550;
-    this->delta_time = 0;
-    this->frame_delay = 1000.0f / FPS;
-    this->show_fps = SHOW_FPS;
-    this->playing = true;
+    if (game_load_media(g)) {
+        return true;
+    }
 
-    return this;
+    if (player_new(&g->player, g->renderer, g->player_image)) {
+        return true;
+    }
+
+    for (unsigned int i = 0; i < 10; i++) {
+        if (flake_new(&g->flakes, g->renderer, g->white_image, true)) {
+            return true;
+        }
+    }
+
+    for (unsigned int i = 0; i < 5; i++) {
+        if (flake_new(&g->flakes, g->renderer, g->yellow_image, false)) {
+            return true;
+        }
+    }
+
+    if (score_new(&g->score, g->renderer)) {
+        return true;
+    }
+
+    if (fps_new(&g->fps)) {
+        return true;
+    }
+
+    g->playing = true;
+
+    return false;
 }
 
-void game_free(struct Game *this) {
-    // Free loaded Textures
-    SDL_DestroyTexture(this->background_image);
-    this->background_image = NULL;
-    SDL_DestroyTexture(this->player_image);
-    this->player_image = NULL;
-    SDL_DestroyTexture(this->white_image);
-    this->white_image = NULL;
-    SDL_DestroyTexture(this->yellow_image);
-    this->yellow_image = NULL;
+void game_free(struct Game **game) {
+    struct Game *g = *game;
 
-    //Free audio objects
-    Mix_HaltMusic();
-    Mix_FreeMusic(this->music);
-    this->music = NULL;
-    Mix_FreeChunk(this->collect);
-    this->collect = NULL;
-    Mix_FreeChunk(this->hit);
-    this->hit = NULL;
+    player_free(&g->player);
+    flakes_free(&g->flakes);
+    score_free(&g->score);
+    fps_free(&g->fps);
 
-    // Free font
-    TTF_CloseFont(this->font);
-    this->font = NULL;
-
-    // Free player, score, and flakes then game.
-    if (this->player) {
-        free(this->player);
-        this->player = NULL;
-    }
-    if (this->score) {
-        if (this->score->image) {
-            SDL_DestroyTexture(this->score->image);
-        }
-        free(this->score);
-        this->score = NULL;
-    }
-    struct Flake *current = this->flakes;
-    while (current != NULL) {
-        struct Flake *next = current->next;
-        free(current);
-        current = next;
-    }
-    this->flakes = NULL;
-    free(this);
+    Mix_FreeChunk(g->hit_sound);
+    g->hit_sound = NULL;
+    Mix_FreeChunk(g->collect_sound);
+    g->collect_sound = NULL;
+    Mix_FreeMusic(g->winter_music);
+    g->winter_music = NULL;
+    SDL_DestroyTexture(g->white_image);
+    g->white_image = NULL;
+    SDL_DestroyTexture(g->yellow_image);
+    g->yellow_image = NULL;
+    SDL_DestroyTexture(g->player_image);
+    g->player_image = NULL;
+    SDL_DestroyTexture(g->background_image);
+    g->background_image = NULL;
+    SDL_DestroyRenderer(g->renderer);
+    g->renderer = NULL;
+    SDL_DestroyWindow(g->window);
+    g->window = NULL;
+    TTF_Quit();
+    Mix_Quit();
+    SDL_Quit();
+    free(g);
+    g = NULL;
+    *game = NULL;
 }
 
-bool game_run(struct Game *this) {
+bool game_reset(struct Game *g) {
 
-    this->player = player_new(this->renderer, this->player_image);
-    if (!this->player || this->player->error) {
-        return false;
+    flakes_reset(g->flakes, true);
+    if (score_reset(g->score)) {
+        return true;
     }
+    if (Mix_PlayMusic(g->winter_music, -1)) {
+        fprintf(stderr, "Error while playing music: %s\n", Mix_GetError());
+        return true;
+    }
+    g->playing = true;
 
-    this->flakes = NULL;
-    for(short unsigned i = 0; i < 10; i++) {
-        if (!flake_new(&this->flakes, this->renderer, this->white_image, true) || this->flakes->error) {
-            return false;
+    return false;
+}
+
+bool handle_collision(struct Game *g, struct Flake *f) {
+    if (f->is_white) {
+        Mix_PlayChannel(-1, g->collect_sound, 0);
+        if (score_increment(g->score)) {
+            return true;
         }
+        flake_reset(f, false);
+    } else {
+        Mix_HaltMusic();
+        Mix_PlayChannel(-1, g->hit_sound, 0);
+        g->playing = false;
     }
-    for(short unsigned i = 0; i < 5; i++) {
-        if (!flake_new(&this->flakes, this->renderer, this->yellow_image, false) || this->flakes->error) {
-            return false;
+    return false;
+}
+
+bool check_collision(struct Game *g) {
+    struct Flake *f = g->flakes;
+    while (f) {
+        if (flake_bottom(f) > player_top(g->player)) {
+            if (flake_right(f) > player_left(g->player)) {
+                if (flake_left(f) < player_right(g->player)) {
+                    if (handle_collision(g, f)) {
+                        return true;
+                    }
+
+                }
+            }
         }
+        f = f->next;
     }
+    return false;
+}
 
-    this->score = score_new(this->renderer, this->font);
-    if (!this->score || this->score->error) {
-        return false;
+bool game_run(struct Game *g) {
+
+    if (Mix_PlayMusic(g->winter_music, -1)) {
+        fprintf(stderr, "Error while playing music: %s\n", Mix_GetError());
+        return true;
     }
-
-    //Play the music
-    Mix_PlayMusic(this->music, -1);
 
     while (true) {
-
-        // Check key events, key pressed or released.
-        while (SDL_PollEvent(&this->event)) {
-            switch (this->event.type) {
-
+        while (SDL_PollEvent(&g->event)) {
+            switch (g->event.type) {
                 case SDL_QUIT:
-                    // handling of close button
-                    return true;
+                    return false;
+                    break;
                 case SDL_KEYDOWN:
-                    // keyboard API for key pressed
-                    switch (this->event.key.keysym.scancode) {
+                    switch (g->event.key.keysym.scancode) {
                         case SDL_SCANCODE_ESCAPE:
-                            return true;
+                            return false;
+                            break;
                         case SDL_SCANCODE_SPACE:
-                            if (!this->playing) {
-                                if (!score_reset(this->score)) {
-                                    return false;
+                            if (!g->playing) {
+                                if (game_reset(g)) {
+                                    return true;
                                 }
-                                this->playing = true;
-                                for(struct Flake *flake = this->flakes; flake != NULL; flake = flake->next) {
-                                    flake_reset(flake, true);
-                                }
-                                Mix_PlayMusic(this->music, -1);
                             }
+                            break;
+                        case SDL_SCANCODE_F:
+                            fps_toggle_display(g->fps);
                             break;
                         default:
                             break;
                     }
+                default:
+                    break;
             }
         }
 
-        if (this->playing) {
-            player_update(this->player, this->delta_time);
-            for(struct Flake *flake = this->flakes; flake != NULL; flake = flake->next) {
-                flake_update(flake, this->delta_time);
-                if (flake->rect.y + flake->rect.h > this->ground) {
-                    flake_reset(flake, false);
-                } else if (flake_check_collide(&flake->rect, &this->player->hit_box)) {
-                    if (flake->is_white) {
-                        Mix_PlayChannel(-1, this->collect, 0);
-                        flake_reset(flake, false);
-                        score_increment(this->score);
-                    } else {
-                        Mix_HaltMusic();
-                        Mix_PlayChannel(-1, this->hit, 0);
-                        this->playing = false;
-                    }
-                }
+        if (g->playing) {
+            player_update(g->player, g->delta_time);
+
+            flakes_update(g->flakes, g->delta_time);
+
+            if (check_collision(g)) {
+                return true;
             }
         }
 
-        // Clear the existing renderer.
-        if (SDL_RenderClear(this->renderer)) {
+        if (SDL_RenderClear(g->renderer)) {
             fprintf(stderr, "Error while clearing renderer: %s\n", SDL_GetError());
-            return false;
+            return true;
         }
 
-        // Draw the images to the renderer.
-        if ( SDL_RenderCopy(this->renderer, this->background_image, NULL, NULL)) {
+        if ( SDL_RenderCopy(g->renderer, g->background_image, NULL, &g->background_rect)) {
             fprintf(stderr, "Error while rendering texture: %s\n", SDL_GetError());
-            return false;
+            return true;
         }
 
-        // Draw player to the renderer.
-        if (!player_draw(this->player)) {
-            return false;
+        if (player_draw(g->player)) {
+            return true;
         }
 
-        // Draw flakes to the renderer.
-        for(struct Flake *flake = this->flakes; flake != NULL; flake = flake->next) {
-            if (!flake_draw(flake)) {
-                return false;
-            }
+        if (flakes_draw(g->flakes)) {
+            return true;
         }
 
-        // Draw score to the renderer.
-        if (!score_draw(this->score)) {
-            return false;
+        if (score_draw(g->score)) {
+            return true;
         }
-        
-        // Swap the back buffer to the front.
-        SDL_RenderPresent(this->renderer);
 
-        // Print FPS to standard output.
-        if (this->show_fps)
-            fps_print();
+        SDL_RenderPresent(g->renderer);
 
-        // Calculate delay needed for the FPS.
-        this->delta_time = fps_delay(this->frame_delay);
+        g->delta_time = fps_update(g->fps);
     }
     
-    return true;
+    return false;
 }

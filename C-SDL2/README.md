@@ -10,13 +10,13 @@ ArchLinux instructions.
 
     sudo pacman -S --needed base-devel
     sudo pacman -S --needed sdl2 sdl2_image sdl2_mixer sdl2_ttf
-    make
-    ./yellow-snow
+    make release run
 
 
 # Controls
 Left Arrow - Moves left.\
 Right Arrow - Moves right.\
 Space Bar - Resets the Game.\
-Escape - Quits and closes game.
+Escape - Quits and closes game. \
+F - Prints FPS to the console.
 

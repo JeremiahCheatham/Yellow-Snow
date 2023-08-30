@@ -4,22 +4,24 @@
 
 #include "main.h"
 
-// Struct for node of linked list.
 struct Flake {
     struct Flake *next;
     SDL_Renderer *renderer;
     SDL_Texture *image;
     SDL_Rect rect;
-    float y;
+    double y_pos;
     bool is_white;
-    unsigned int speed;
-    bool error;
+    double speed;
 };
 
-struct Flake* flake_new(struct Flake **flakes, SDL_Renderer *renderer, SDL_Texture *image, bool is_white);
-void flake_update(struct Flake *this, float delta_time);
-bool flake_draw(struct Flake *this);
-bool flake_check_collide(SDL_Rect *flake, SDL_Rect *player);
-void flake_reset(struct Flake *this, bool full);
+bool flake_new(struct Flake **flakes, SDL_Renderer *renderer, SDL_Texture *image, bool is_white);
+void flakes_free(struct Flake **flakes);
+void flake_reset(struct Flake *f, bool full);
+void flakes_reset(struct Flake *f, bool full);
+int flake_left(struct Flake *f);
+int flake_right(struct Flake *f);
+int flake_bottom(struct Flake *f);
+void flakes_update(struct Flake *f, double dt);
+bool flakes_draw(struct Flake *f);
 
 #endif

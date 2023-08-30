@@ -10,13 +10,13 @@ struct Score {
     SDL_Color color;
     SDL_Rect rect;
     Uint32 score;
-    bool error;
 };
 
-struct Score* score_new(SDL_Renderer *renderer, TTF_Font *font);
-bool score_update(struct Score *this);
-bool score_increment(struct Score *this);
-bool score_draw(struct Score *this);
-bool score_reset(struct Score *this);
+bool score_new(struct Score **score, SDL_Renderer *renderer);
+void score_free(struct Score **score);
+bool score_reset(struct Score *s);
+bool score_update(struct Score *s);
+bool score_increment(struct Score *s);
+bool score_draw(struct Score *s);
 
 #endif
