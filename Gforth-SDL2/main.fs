@@ -23,10 +23,7 @@ require load_media.fs
 require player.fs
 require game.fs
 
-start-sdl
-create-window
-create-renderer
-
+sdl-init
 background-init
 player-init
 
