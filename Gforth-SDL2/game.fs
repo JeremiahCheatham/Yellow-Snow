@@ -1,13 +1,27 @@
-: background-init ( -- )
-    s\" images/background.png\0" DROP background-image background-rect create-texture-and-rect ;
+require sdl_init.fs
+require load_media.fs
+require background.fs
+require player.fs
 
-: main-loop ( -- )
+: game-cleanup ( -- )
+    player-cleanup
+    background-cleanup
+    sdl-cleanup
+;
+
+: game-init ( -- )
+    sdl-init
+    background-init IF game-cleanup THEN
+    player-init IF game-cleanup THEN
+;
+
+: game-loop ( -- )
     BEGIN
         BEGIN event SDL_PollEvent WHILE
             event SDL_Event-type L@
-            DUP SDL_QUIT_ENUM = IF clean-and-exit THEN
+            DUP SDL_QUIT_ENUM = IF DROP game-cleanup THEN
             SDL_KEYDOWN = IF event SDL_KeyboardEvent-keysym L@
-                DUP SDL_SCANCODE_ESCAPE = IF clean-and-exit THEN
+                DUP SDL_SCANCODE_ESCAPE = IF DROP game-cleanup THEN
                 SDL_SCANCODE_SPACE = IF .s CR THEN
             THEN
         REPEAT
@@ -16,11 +30,16 @@
         
         renderer @ SDL_RenderClear DROP
 
-        renderer @ background-image @ 0 background-rect SDL_RenderCopy DROP
-        renderer @ player-image @ 0 player-rect 0e 0 player-direction @ SDL_RenderCopyEX DROP
+        background-draw
+        player-draw
 
         renderer @ SDL_RenderPresent
 
         16 SDL_Delay
-    FALSE UNTIL ;
+    FALSE UNTIL
+;
 
+: game-play ( -- )
+    game-init
+    game-loop
+;
