@@ -1,10 +1,15 @@
 require sdl_init.fs
 require load_media.fs
 require background.fs
+require flakes.fs
 require player.fs
+
+\ seed the random generator
+utime DROP seed ! rnd DROP
 
 : game-cleanup ( -- )
     player-cleanup
+    flakes-cleanup
     background-cleanup
     sdl-cleanup
 ;
@@ -12,6 +17,7 @@ require player.fs
 : game-init ( -- )
     sdl-init
     background-init IF game-cleanup THEN
+    flakes-init IF game-cleanup THEN
     player-init IF game-cleanup THEN
 ;
 
@@ -27,11 +33,13 @@ require player.fs
         REPEAT
 
         player-update
+        flakes-update
         
         renderer @ SDL_RenderClear DROP
 
         background-draw
         player-draw
+        flakes-draw
 
         renderer @ SDL_RenderPresent
 

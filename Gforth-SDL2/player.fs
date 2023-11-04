@@ -8,7 +8,7 @@ VARIABLE player-direction SDL_FLIP_NONE player-direction L!
         -1
     ELSE
         377 player-rect SDL_Rect-y l!
-        SCREEN_WIDTH player-rect SDL_Rect-w l@ - 2 / player-rect SDL_Rect-x l!
+        SCREEN_WIDTH player-rect SDL_Rect-w l@ - 2 / player-rect SDL_Rect-x L!
         0
     THEN
 ;
