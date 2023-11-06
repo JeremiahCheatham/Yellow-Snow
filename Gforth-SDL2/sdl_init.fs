@@ -6,6 +6,7 @@ CREATE event SDL_Event ALLOT
 : sdl-cleanup ( -- )
     renderer @ SDL_DestroyRenderer
     window @ SDL_DestroyWindow
+    TTF_Quit
     SDL_Quit
     BYE
 ;
@@ -15,8 +16,17 @@ CREATE event SDL_Event ALLOT
         ." Failed to initialize SDL: " SDL_GetError c-str> TYPE CR
         sdl-cleanup
     THEN
+
     IMG_INIT_PNG IMG_Init DROP
+
+    TTF_Init IF
+        ." Error initializing SDL_ttf: " SDL_GetError c-str> TYPE CR
+        sdl-cleanup
+    THEN
+
     0 SDL_GetKeyboardState keystate !
+
+    \ 44100 MIX_DEFAULT_FORMAT 2 1024 Mix_OpenAudio .s CR
 ;
 
 : create-window ( -- )
@@ -24,7 +34,7 @@ CREATE event SDL_Event ALLOT
     SDL_CreateWindow window !
     window @ 0= IF 
         ." Failed to create window: " SDL_GetError c-str> TYPE CR
-        sdl-cleanup
+sdl-cleanup
     THEN
 ;
 

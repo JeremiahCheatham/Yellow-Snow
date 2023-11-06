@@ -1,7 +1,7 @@
 require random.fs
 require SDL2/SDL.fs
 require SDL2/SDL_image.fs
-\ require SDL2/SDL_ttf.fs
+require SDL2/SDL_ttf.fs
 
 s\" Don't Eat the Yellow Snow!\0" DROP CONSTANT WINDOW_TITLE
 800 CONSTANT SCREEN_WIDTH
