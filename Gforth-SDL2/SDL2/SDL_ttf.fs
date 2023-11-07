@@ -1,6 +1,6 @@
 \ ----===< prefix >===-----
 c-library sdl_ttf
-s" SDL2" add-lib
+s" SDL2_ttf" add-lib
 \c #include <SDL2/SDL_ttf.h>
 
 \ ----===< int constants >===-----
@@ -31,6 +31,122 @@ s" SDL2" add-lib
 #1	constant TTF_DIRECTION_RTL
 #2	constant TTF_DIRECTION_TTB
 #3	constant TTF_DIRECTION_BTT
+
+
+\c SDL_Surface * GF_TTF_RenderText_Solid(TTF_Font *font, const char *text, SDL_Color *fg) {
+\c     return TTF_RenderText_Solid(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Solid(TTF_Font *font, const char *text, SDL_Color *fg) {
+\c     return TTF_RenderUTF8_Solid(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Solid(TTF_Font *font, const Uint16 *text, SDL_Color *fg) {
+\c     return TTF_RenderUNICODE_Solid(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderText_Solid_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderText_Solid_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Solid_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderUTF8_Solid_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Solid_Wrapped(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderUNICODE_Solid_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph_Solid(TTF_Font *font, Uint16 ch, SDL_Color *fg) {
+\c     return TTF_RenderGlyph_Solid(font, ch, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph32_Solid(TTF_Font *font, Uint32 ch, SDL_Color *fg) {
+\c     return TTF_RenderGlyph32_Solid(font, ch, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderText_Shaded(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderText_Shaded(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Shaded(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderUTF8_Shaded(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Shaded(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderUNICODE_Shaded(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderText_Shaded_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderText_Shaded_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Shaded_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderUTF8_Shaded_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Shaded_Wrapped(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderUNICODE_Shaded_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph_Shaded(TTF_Font *font, Uint16 ch, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderGlyph_Shaded(font, ch, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph32_Shaded(TTF_Font *font, Uint32 ch, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderGlyph32_Shaded(font, ch, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderText_Blended(TTF_Font *font, const char *text, SDL_Color *fg) {
+\c     return TTF_RenderText_Blended(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Blended(TTF_Font *font, const char *text, SDL_Color *fg) {
+\c     return TTF_RenderUTF8_Blended(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Blended(TTF_Font *font, const Uint16 *text, SDL_Color *fg) {
+\c     return TTF_RenderUNICODE_Blended(font, text, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderText_Blended_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderText_Blended_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_Blended_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderUTF8_Blended_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_Blended_Wrapped(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, Uint32 wrapLength) {
+\c     return TTF_RenderUNICODE_Blended_Wrapped(font, text, *fg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph_Blended(TTF_Font *font, Uint16 ch, SDL_Color *fg) {
+\c     return TTF_RenderGlyph_Blended(font, ch, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph32_Blended(TTF_Font *font, Uint32 ch, SDL_Color *fg) {
+\c     return TTF_RenderGlyph32_Blended(font, ch, *fg); }
+
+\c SDL_Surface * GF_TTF_RenderText_LCD(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderText_LCD(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_LCD(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderUTF8_LCD(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_LCD(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderUNICODE_LCD(font, text, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderText_LCD_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderText_LCD_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUTF8_LCD_Wrapped(TTF_Font *font, \
+\c     const char *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderUTF8_LCD_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderUNICODE_LCD_Wrapped(TTF_Font *font, \
+\c     const Uint16 *text, SDL_Color *fg, SDL_Color *bg, Uint32 wrapLength) {
+\c     return TTF_RenderUNICODE_LCD_Wrapped(font, text, *fg, *bg, wrapLength); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph_LCD(TTF_Font *font, Uint16 ch, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderGlyph_LCD(font, ch, *fg, *bg); }
+
+\c SDL_Surface * GF_TTF_RenderGlyph32_LCD(TTF_Font *font, Uint32 ch, SDL_Color *fg, SDL_Color *bg) {
+\c     return TTF_RenderGlyph32_LCD(font, ch, *fg, *bg); }
+
 
 \ ------===< functions >===-------
 c-function TTF_Linked_Version TTF_Linked_Version  -- a	( -- )
@@ -76,38 +192,40 @@ c-function TTF_SizeUNICODE TTF_SizeUNICODE a a a a -- n	( font text w h -- )
 c-function TTF_MeasureText TTF_MeasureText a a n a a -- n	( font text measure_width extent count -- )
 c-function TTF_MeasureUTF8 TTF_MeasureUTF8 a a n a a -- n	( font text measure_width extent count -- )
 c-function TTF_MeasureUNICODE TTF_MeasureUNICODE a a n a a -- n	( font text measure_width extent count -- )
-\ c-function TTF_RenderText_Solid TTF_RenderText_Solid a a n -- a	( font text fg -- )
-\ c-function TTF_RenderUTF8_Solid TTF_RenderUTF8_Solid a a n -- a	( font text fg -- )
-\ c-function TTF_RenderUNICODE_Solid TTF_RenderUNICODE_Solid a a n -- a	( font text fg -- )
-\ c-function TTF_RenderText_Solid_Wrapped TTF_RenderText_Solid_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderUTF8_Solid_Wrapped TTF_RenderUTF8_Solid_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderUNICODE_Solid_Wrapped TTF_RenderUNICODE_Solid_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderGlyph_Solid TTF_RenderGlyph_Solid a n n -- a	( font ch fg -- )
-\ c-function TTF_RenderGlyph32_Solid TTF_RenderGlyph32_Solid a n n -- a	( font ch fg -- )
-\ c-function TTF_RenderText_Shaded TTF_RenderText_Shaded a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderUTF8_Shaded TTF_RenderUTF8_Shaded a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderUNICODE_Shaded TTF_RenderUNICODE_Shaded a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderText_Shaded_Wrapped TTF_RenderText_Shaded_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderUTF8_Shaded_Wrapped TTF_RenderUTF8_Shaded_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderUNICODE_Shaded_Wrapped TTF_RenderUNICODE_Shaded_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderGlyph_Shaded TTF_RenderGlyph_Shaded a n n n -- a	( font ch fg bg -- )
-\ c-function TTF_RenderGlyph32_Shaded TTF_RenderGlyph32_Shaded a n n n -- a	( font ch fg bg -- )
-\ c-function TTF_RenderText_Blended TTF_RenderText_Blended a a n -- a	( font text fg -- )
-\ c-function TTF_RenderUTF8_Blended TTF_RenderUTF8_Blended a a n -- a	( font text fg -- )
-\ c-function TTF_RenderUNICODE_Blended TTF_RenderUNICODE_Blended a a n -- a	( font text fg -- )
-\ c-function TTF_RenderText_Blended_Wrapped TTF_RenderText_Blended_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderUTF8_Blended_Wrapped TTF_RenderUTF8_Blended_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderUNICODE_Blended_Wrapped TTF_RenderUNICODE_Blended_Wrapped a a n n -- a	( font text fg wrapLength -- )
-\ c-function TTF_RenderGlyph_Blended TTF_RenderGlyph_Blended a n n -- a	( font ch fg -- )
-\ c-function TTF_RenderGlyph32_Blended TTF_RenderGlyph32_Blended a n n -- a	( font ch fg -- )
-\ c-function TTF_RenderText_LCD TTF_RenderText_LCD a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderUTF8_LCD TTF_RenderUTF8_LCD a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderUNICODE_LCD TTF_RenderUNICODE_LCD a a n n -- a	( font text fg bg -- )
-\ c-function TTF_RenderText_LCD_Wrapped TTF_RenderText_LCD_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderUTF8_LCD_Wrapped TTF_RenderUTF8_LCD_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderUNICODE_LCD_Wrapped TTF_RenderUNICODE_LCD_Wrapped a a n n n -- a	( font text fg bg wrapLength -- )
-\ c-function TTF_RenderGlyph_LCD TTF_RenderGlyph_LCD a n n n -- a	( font ch fg bg -- )
-\ c-function TTF_RenderGlyph32_LCD TTF_RenderGlyph32_LCD a n n n -- a	( font ch fg bg -- )
+
+c-function TTF_RenderText_Solid GF_TTF_RenderText_Solid a a a -- a	( font text fg -- )
+c-function TTF_RenderUTF8_Solid GF_TTF_RenderUTF8_Solid a a a -- a	( font text fg -- )
+c-function TTF_RenderUNICODE_Solid GF_TTF_RenderUNICODE_Solid a a a -- a	( font text fg -- )
+c-function TTF_RenderText_Solid_Wrapped GF_TTF_RenderText_Solid_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderUTF8_Solid_Wrapped GF_TTF_RenderUTF8_Solid_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderUNICODE_Solid_Wrapped GF_TTF_RenderUNICODE_Solid_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderGlyph_Solid GF_TTF_RenderGlyph_Solid a n a -- a	( font ch fg -- )
+c-function TTF_RenderGlyph32_Solid GF_TTF_RenderGlyph32_Solid a n a -- a	( font ch fg -- )
+c-function TTF_RenderText_Shaded GF_TTF_RenderText_Shaded a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderUTF8_Shaded GF_TTF_RenderUTF8_Shaded a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderUNICODE_Shaded GF_TTF_RenderUNICODE_Shaded a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderText_Shaded_Wrapped GF_TTF_RenderText_Shaded_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderUTF8_Shaded_Wrapped GF_TTF_RenderUTF8_Shaded_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderUNICODE_Shaded_Wrapped GF_TTF_RenderUNICODE_Shaded_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderGlyph_Shaded GF_TTF_RenderGlyph_Shaded a n a a -- a	( font ch fg bg -- )
+c-function TTF_RenderGlyph32_Shaded GF_TTF_RenderGlyph32_Shaded a n a a -- a	( font ch fg bg -- )
+c-function TTF_RenderText_Blended GF_TTF_RenderText_Blended a a a -- a	( font text fg -- )
+c-function TTF_RenderUTF8_Blended GF_TTF_RenderUTF8_Blended a a a -- a	( font text fg -- )
+c-function TTF_RenderUNICODE_Blended GF_TTF_RenderUNICODE_Blended a a a -- a	( font text fg -- )
+c-function TTF_RenderText_Blended_Wrapped GF_TTF_RenderText_Blended_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderUTF8_Blended_Wrapped GF_TTF_RenderUTF8_Blended_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderUNICODE_Blended_Wrapped GF_TTF_RenderUNICODE_Blended_Wrapped a a a n -- a	( font text fg wrapLength -- )
+c-function TTF_RenderGlyph_Blended GF_TTF_RenderGlyph_Blended a n a -- a	( font ch fg -- )
+c-function TTF_RenderGlyph32_Blended GF_TTF_RenderGlyph32_Blended a n a -- a	( font ch fg -- )
+c-function TTF_RenderText_LCD GF_TTF_RenderText_LCD a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderUTF8_LCD GF_TTF_RenderUTF8_LCD a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderUNICODE_LCD GF_TTF_RenderUNICODE_LCD a a a a -- a	( font text fg bg -- )
+c-function TTF_RenderText_LCD_Wrapped GF_TTF_RenderText_LCD_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderUTF8_LCD_Wrapped GF_TTF_RenderUTF8_LCD_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderUNICODE_LCD_Wrapped GF_TTF_RenderUNICODE_LCD_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
+c-function TTF_RenderGlyph_LCD GF_TTF_RenderGlyph_LCD a n a a -- a	( font ch fg bg -- )
+c-function TTF_RenderGlyph32_LCD GF_TTF_RenderGlyph32_LCD a n a a -- a	( font ch fg bg -- )
+
 c-function TTF_CloseFont TTF_CloseFont a -- void	( font -- )
 c-function TTF_Quit TTF_Quit  -- void	( -- )
 c-function TTF_WasInit TTF_WasInit  -- n	( -- )
