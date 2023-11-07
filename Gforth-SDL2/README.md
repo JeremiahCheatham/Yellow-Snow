@@ -17,7 +17,7 @@ ArchLinux instructions.
     git clone git clone https://github.com/jeremiahcheatham/Yellow-Snow
     cd ~/Yellow-Snow/Gforth-SDL2
 
-    gforth main.fs
+    gforth game.fs
 
 
 # Controls

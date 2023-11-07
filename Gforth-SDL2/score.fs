@@ -3,13 +3,48 @@ CREATE score-rect SDL_Rect ALLOT
 CREATE score-color SDL_Color ALLOT
 24 CONSTANT score-font-size
 VARIABLE score-font
+VARIABLE score 0 score !
 
 : score-cleanup ( -- )
     score-font @ TTF_CloseFont
     score-image @ SDL_DestroyTexture
 ;
 
-: score-init ( -- )
+: score-update ( -- error )
+    score-image @ SDL_DestroyTexture
+    0 score-image !
+    score-font @
+    s" Score: " PAD PLACE
+    score @ 0 <<# #s #> #>> PAD +PLACE
+    s\" \0" PAD +PLACE
+    PAD COUNT DROP
+    score-color TTF_RenderText_Blended DUP @ 0= IF
+        ." Error creating font surface: " SDL_GetError c-str> TYPE CR
+        DROP
+        TRUE
+    ELSE
+        score-rect rect-from-surface
+        10 score-rect SDL_Rect-x int32>!
+        10 score-rect SDL_Rect-y int32>!
+        score-image SWAP texture-from-surface IF
+            TRUE
+        ELSE
+            FALSE
+        THEN
+    THEN
+;
+
+: score-reset ( -- error )
+    0 score !
+    score-update
+;
+
+: score-increment ( -- error )
+    1 score @ + score !
+    score-update
+;
+
+: score-init ( -- error )
     score-color
     255 OVER SDL_Color-r C!
     255 OVER SDL_Color-g C!
@@ -21,20 +56,11 @@ VARIABLE score-font
         ." Error creating font: " SDL_GetError c-str> TYPE CR
         TRUE
     ELSE
-        \ score-font @ s\" 0\0" score-color TTF_RenderText_Blended DUP @ 0= IF
-        \    ." Error creating font surface: " SDL_GetError c-str> TYPE CR
-        \    DROP
-        \    TRUE
-        \ ELSE
-        \    score-rect @ rect-from-surface
-        \    10 score-rect SDL_Rect-x int32>!
-        \    10 score-rect SDL_Rect-y int32>!
-        \    score-image SWAP texture-from-surface IF
-        \        TRUE
-        \    ELSE
-                FALSE
-        \    THEN
-        \ THEN
+        score-update IF
+            TRUE
+        ELSE
+            FALSE
+        THEN
     THEN
 ;
 

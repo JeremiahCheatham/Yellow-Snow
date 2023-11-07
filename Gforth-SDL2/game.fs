@@ -6,7 +6,6 @@ require player.fs
 require score.fs
 
 VARIABLE playing TRUE playing !
-VARIABLE score 0 score !
 
 \ seed the random generator
 utime DROP seed ! rnd DROP
@@ -34,8 +33,7 @@ utime DROP seed ! rnd DROP
             DUP flake-right player-left > IF
                 DUP flake-left player-right < IF
                     DUP SCREEN_HEIGHT flake-reset
-                    score @ 1 + score !
-                    score @ . CR
+                    score-increment IF game-cleanup THEN
                 THEN
             THEN
         THEN DROP
@@ -59,8 +57,7 @@ utime DROP seed ! rnd DROP
     white-array white-length flakes-array-reset
     yellow-array yellow-length flakes-array-reset
     TRUE playing !
-    0 score !
-    score @ . CR
+    score-reset IF game-cleanup THEN
 ;
 
 : game-loop ( -- )
@@ -71,6 +68,7 @@ utime DROP seed ! rnd DROP
             SDL_KEYDOWN = IF event SDL_KeyboardEvent-keysym L@
                 DUP SDL_SCANCODE_ESCAPE = IF DROP game-cleanup THEN
                 SDL_SCANCODE_SPACE = IF
+                    .s CR
                     playing @ 0= IF
                         game-reset
                     THEN
