@@ -5,17 +5,34 @@ require flakes.fs
 require player.fs
 require score.fs
 
+VARIABLE winter-music
+VARIABLE collect-sound
+VARIABLE hit-sound
 VARIABLE playing TRUE playing !
 
 \ seed the random generator
 utime DROP seed ! rnd DROP
 
 : game-cleanup ( -- )
+    winter-music @ Mix_FreeMusic
+    collect-sound @ Mix_FreeChunk
+    hit-sound @ Mix_FreeChunk
     score-cleanup
     player-cleanup
     flakes-cleanup
     background-cleanup
     sdl-cleanup
+;
+
+: game-reset ( -- )
+    white-array white-length flakes-array-reset
+    yellow-array yellow-length flakes-array-reset
+    TRUE playing !
+    score-reset IF game-cleanup THEN
+    winter-music @ -1 Mix_PlayMusic IF
+        ." Error while playing music: " SDL_GetError c-str> TYPE CR
+        sdl-cleanup
+    THEN
 ;
 
 : game-init ( -- )
@@ -24,6 +41,26 @@ utime DROP seed ! rnd DROP
     flakes-init IF game-cleanup THEN
     player-init IF game-cleanup THEN
     score-init IF game-cleanup THEN
+
+    s\" music/winter_loop.ogg\0" DROP Mix_LoadMUS winter-music !
+    winter-music @ 0= IF
+        ." Error loading music: " SDL_GetError c-str> TYPE CR
+        game-cleanup
+    THEN
+
+    s\" sounds/collect.ogg\0" DROP Mix_LoadWAV collect-sound !
+    collect-sound @ 0= IF
+        ." Error loading sound effect: " SDL_GetError c-str> TYPE CR
+        game-cleanup
+    THEN
+
+    s\" sounds/hit.ogg\0" DROP Mix_LoadWAV hit-sound !
+    hit-sound @ 0= IF
+        ." Error loading sound effect: " SDL_GetError c-str> TYPE CR
+        game-cleanup
+    THEN
+
+    game-reset
 ;
 
 : check-white-collision ( -- )
@@ -34,6 +71,7 @@ utime DROP seed ! rnd DROP
                 DUP flake-left player-right < IF
                     DUP SCREEN_HEIGHT flake-reset
                     score-increment IF game-cleanup THEN
+                    -1 collect-sound @ 0 Mix_PlayChannel DROP
                 THEN
             THEN
         THEN DROP
@@ -47,18 +85,14 @@ utime DROP seed ! rnd DROP
             DUP flake-right player-left > IF
                 DUP flake-left player-right < IF
                     FALSE playing !
+                    Mix_HaltMusic DROP
+                    -1 hit-sound @ 0 Mix_PlayChannel DROP
                 THEN
             THEN
         THEN DROP
     LOOP DROP
 ;
 
-: game-reset ( -- )
-    white-array white-length flakes-array-reset
-    yellow-array yellow-length flakes-array-reset
-    TRUE playing !
-    score-reset IF game-cleanup THEN
-;
 
 : game-loop ( -- )
     BEGIN

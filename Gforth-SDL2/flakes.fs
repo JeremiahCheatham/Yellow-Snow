@@ -21,8 +21,7 @@ CREATE yellow-array yellow-length SDL_Rect * ALLOT
     0 DO
         DUP SDL_Rect I * +
         OVER SDL_Rect-w int32<@ OVER SDL_Rect-w int32>!
-        OVER SDL_Rect-h int32<@ OVER SDL_Rect-h int32>!
-        SCREEN_HEIGHT 2 * flake-reset 
+        OVER SDL_Rect-h int32<@ SWAP SDL_Rect-h int32>!
     LOOP DROP
 ;
 

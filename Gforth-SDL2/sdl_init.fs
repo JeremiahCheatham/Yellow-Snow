@@ -2,22 +2,32 @@ VARIABLE window
 VARIABLE renderer
 VARIABLE keystate
 CREATE event SDL_Event ALLOT
+IMG_INIT_PNG CONSTANT img-flags
 
 : sdl-cleanup ( -- )
     renderer @ SDL_DestroyRenderer
     window @ SDL_DestroyWindow
     TTF_Quit
+    Mix_Quit
     SDL_Quit
     BYE
 ;
 
 : start-sdl ( -- )
     SDL_INIT_EVERYTHING SDL_Init IF
-        ." Failed to initialize SDL: " SDL_GetError c-str> TYPE CR
+        ." Error initializing SDL: " SDL_GetError c-str> TYPE CR
         sdl-cleanup
     THEN
 
-    IMG_INIT_PNG IMG_Init DROP
+    img-flags IMG_Init img-flags AND img-flags <> IF
+        ." Error initializing SDL_image: " SDL_GetError c-str> TYPE CR
+        sdl-cleanup
+    THEN
+
+    MIX_DEFAULT_FREQUENCY MIX_DEFAULT_FORMAT MIX_DEFAULT_CHANNELS 1024 Mix_OpenAudio IF
+        ." Error initializing SDL_mixer: " SDL_GetError c-str> TYPE CR
+        sdl-cleanup
+    THEN
 
     TTF_Init IF
         ." Error initializing SDL_ttf: " SDL_GetError c-str> TYPE CR
@@ -25,8 +35,6 @@ CREATE event SDL_Event ALLOT
     THEN
 
     0 SDL_GetKeyboardState keystate !
-
-    \ 44100 MIX_DEFAULT_FORMAT 2 1024 Mix_OpenAudio .s CR
 ;
 
 : create-window ( -- )
