@@ -27,12 +27,17 @@ begin-structure IMG_Animation
 drop 32 end-structure
 
 \ ------===< functions >===-------
+c-function IMG_GetError SDL_GetError -- a ( -- string )
+c-function IMG_ClearError SDL_ClearError -- void ( -- )
 c-function IMG_Linked_Version IMG_Linked_Version  -- a	( -- )
 c-function IMG_Init IMG_Init n -- n	( flags -- )
 c-function IMG_Quit IMG_Quit  -- void	( -- )
 c-function IMG_LoadTyped_RW IMG_LoadTyped_RW a n a -- a	( src freesrc type -- )
 c-function IMG_Load IMG_Load a -- a	( file -- )
 c-function IMG_Load_RW IMG_Load_RW a n -- a	( src freesrc -- )
+c-function IMG_LoadTextureType_RW IMG_LoadTextureTyped_RW a a n a -- a ( renderer src freesrc type -- texture )
+c-function IMG_LoadTexture IMG_LoadTexture a a -- a ( renderer file -- texture )
+c-function IMG_LoadTexture_RW IMG_LoadTexture_RW a a n -- a ( renderer src freesrc -- texture )
 c-function IMG_isAVIF IMG_isAVIF a -- n	( src -- )
 c-function IMG_isICO IMG_isICO a -- n	( src -- )
 c-function IMG_isCUR IMG_isCUR a -- n	( src -- )

@@ -3,6 +3,7 @@ c-library sdl_ttf
 s" SDL2_ttf" add-lib
 \c #include <SDL2/SDL_ttf.h>
 
+
 \ ----===< int constants >===-----
 #2	constant SDL_TTF_MAJOR_VERSION
 #20	constant SDL_TTF_MINOR_VERSION
@@ -25,6 +26,7 @@ s" SDL2_ttf" add-lib
 #0	constant TTF_WRAPPED_ALIGN_LEFT
 #1	constant TTF_WRAPPED_ALIGN_CENTER
 #2	constant TTF_WRAPPED_ALIGN_RIGHT
+
 
 \ --------===< enums >===---------
 #0	constant TTF_DIRECTION_LTR
@@ -149,6 +151,8 @@ s" SDL2_ttf" add-lib
 
 
 \ ------===< functions >===-------
+c-function TTF_GetError SDL_GetError  -- a	( -- string )
+c-function TTF_ClearError SDL_ClearError  -- void	( -- )
 c-function TTF_Linked_Version TTF_Linked_Version  -- a	( -- )
 c-function TTF_GetFreeTypeVersion TTF_GetFreeTypeVersion a a a -- void	( major minor patch -- )
 c-function TTF_GetHarfBuzzVersion TTF_GetHarfBuzzVersion a a a -- void	( major minor patch -- )
@@ -192,7 +196,6 @@ c-function TTF_SizeUNICODE TTF_SizeUNICODE a a a a -- n	( font text w h -- )
 c-function TTF_MeasureText TTF_MeasureText a a n a a -- n	( font text measure_width extent count -- )
 c-function TTF_MeasureUTF8 TTF_MeasureUTF8 a a n a a -- n	( font text measure_width extent count -- )
 c-function TTF_MeasureUNICODE TTF_MeasureUNICODE a a n a a -- n	( font text measure_width extent count -- )
-
 c-function TTF_RenderText_Solid GF_TTF_RenderText_Solid a a a -- a	( font text fg -- )
 c-function TTF_RenderUTF8_Solid GF_TTF_RenderUTF8_Solid a a a -- a	( font text fg -- )
 c-function TTF_RenderUNICODE_Solid GF_TTF_RenderUNICODE_Solid a a a -- a	( font text fg -- )
@@ -225,7 +228,6 @@ c-function TTF_RenderUTF8_LCD_Wrapped GF_TTF_RenderUTF8_LCD_Wrapped a a a a n --
 c-function TTF_RenderUNICODE_LCD_Wrapped GF_TTF_RenderUNICODE_LCD_Wrapped a a a a n -- a	( font text fg bg wrapLength -- )
 c-function TTF_RenderGlyph_LCD GF_TTF_RenderGlyph_LCD a n a a -- a	( font ch fg bg -- )
 c-function TTF_RenderGlyph32_LCD GF_TTF_RenderGlyph32_LCD a n a a -- a	( font ch fg bg -- )
-
 c-function TTF_CloseFont TTF_CloseFont a -- void	( font -- )
 c-function TTF_Quit TTF_Quit  -- void	( -- )
 c-function TTF_WasInit TTF_WasInit  -- n	( -- )
@@ -238,6 +240,7 @@ c-function TTF_GetFontSDF TTF_GetFontSDF a -- n	( font -- )
 \ c-function TTF_SetScript TTF_SetScript n -- n	( script -- )
 c-function TTF_SetFontDirection TTF_SetFontDirection a n -- n	( font direction -- )
 c-function TTF_SetFontScriptName TTF_SetFontScriptName a a -- n	( font script -- )
+
 
 \ ----===< postfix >===-----
 end-c-library
