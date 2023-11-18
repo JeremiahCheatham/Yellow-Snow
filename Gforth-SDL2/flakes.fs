@@ -33,18 +33,18 @@ CREATE yellow-array yellow-length SDL_Rect * ALLOT
 ;
 
 : flakes-init ( -- error )
-    S\" images/white.png\0" DROP white-image white-array create-texture-and-rect
+    white-array white-image s" images/white.png" >c-str load-texture-and-rect
     IF
-        TRUE
-    ELSE
-        S\" images/yellow.png\0" DROP yellow-image yellow-array create-texture-and-rect
+        yellow-array yellow-image s" images/yellow.png" >c-str load-texture-and-rect
         IF
-            TRUE
-        ELSE
             white-array white-length flakes-array-init
             yellow-array yellow-length flakes-array-init
+            TRUE
+        ELSE
             FALSE
         THEN
+    ELSE
+        FALSE
     THEN
 ;
 

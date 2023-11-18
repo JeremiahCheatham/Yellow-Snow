@@ -51,15 +51,15 @@ VARIABLE score 0 score !
     255 OVER SDL_Color-b C!
     255 SWAP SDL_Color-a C!
 
-    s\" fonts/freesansbold.ttf\0" DROP score-font-size TTF_OpenFont score-font !
+    s" fonts/freesansbold.ttf" >c-str score-font-size TTF_OpenFont score-font !
     score-font @ 0= IF
         ." Error creating font: " SDL_GetError c-str> TYPE CR
-        TRUE
+        FALSE
     ELSE
         score-update IF
-            TRUE
-        ELSE
             FALSE
+        ELSE
+            TRUE
         THEN
     THEN
 ;

@@ -2,7 +2,7 @@ VARIABLE background-image
 CREATE background-rect SDL_Rect ALLOT
 
 : background-init ( -- error )
-    s\" images/background.png\0" DROP background-image background-rect create-texture-and-rect
+    background-rect background-image s" images/background.png" >c-str load-texture-and-rect
 ;
 
 : background-cleanup ( -- )
