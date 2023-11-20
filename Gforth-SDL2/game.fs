@@ -129,8 +129,6 @@ utime DROP seed ! rnd DROP
 
         renderer @ SDL_RenderPresent
 
-        16 SDL_Delay
-        fps-show
         delay-update
     FALSE UNTIL
 ;
