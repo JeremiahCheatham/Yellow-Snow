@@ -1,6 +1,6 @@
 60e FCONSTANT TARGET_FPS
-VARIABLE delay-target 1000e TARGET_FPS f/ delay-target f!
-VARIABLE delay-cap TARGET_FPS 30e f/ delay-cap f!
+VARIABLE delay-target 1000e TARGET_FPS F/ delay-target F!
+VARIABLE delay-cap 20e delay-cap F!
 VARIABLE delay-last SDL_GetTicks delay-last !
 VARIABLE delay-elpsed
 VARIABLE delay-carry
@@ -11,7 +11,7 @@ VARIABLE fps-last-time SDL_GetTicks fps-last-time !
 VARIABLE fps-elapsed-time
 
 : fps-time-since ( fps-last-time -- elapsed-time )
-    SDL_GetTicks DUP ROT 2DUP <= IF
+    SDL_GetTicks DUP ROT 2DUP >= IF
         -
     ELSE
         0xFFFFFFFF SWAP - +
@@ -22,7 +22,7 @@ VARIABLE fps-elapsed-time
 : fps-toggle-display ( -- )
     fps-display @ 0= fps-display !
     0 fps-counter !
-    SDL_GetTicks 1000 + fps-last-time !
+    SDL_GetTicks fps-last-time !
 ;
 
 : fps-show ( -- )
@@ -38,26 +38,22 @@ VARIABLE fps-elapsed-time
 
 : delay-update ( -- )
     delay-last @ fps-time-since DROP delay-elpsed !
-    \ delay-target delay-carry + delay-current !
-    \ delay-current F@ delay-elpsed @ > IF
-    \     delay-current @ delay-elpsed @ - SDL_Delay
-    \ THEN
-    \ delay-last @ fps-time-since delay-last ! delay-elpsed !
+    delay-target F@ delay-carry F@ F+ delay-current F!
+    delay-current F@ delay-elpsed @ S>F F> IF
+        delay-current F@ F>S delay-elpsed @ - SDL_Delay
+    THEN
+    delay-last @ fps-time-since delay-last ! DUP delay-elpsed !
+    
+    delay-current F@ S>F F- delay-carry F!
+    delay-carry F@ delay-cap F@ F> IF
+        delay-cap F@ delay-carry F!
+    THEN
+    delay-carry F@ delay-cap F@ FNEGATE F< IF
+        delay-cap F@ FNEGATE delay-carry F!
+    THEN
+
+    fps-show 
+
+    delay-elpsed @ S>F 1000e F/
 ;
-    \ f->carry_delay = delay - elapsed_time;
-    \ if (f->carry_delay > f->cap_delay) {
-    \     f->carry_delay = f->cap_delay;
-    \ } else if (f->carry_delay < -f->cap_delay) {
-    \     f->carry_delay = -f->cap_delay;
-    \ }
 
-    \ if (f->fps_display) {
-	\ 	f->fps_counter++;
-	\ 	if (fps_time_since(f->fps_last_time, NULL) > 1000) {
-	\ 		printf("%i\n", f->fps_counter);
-	\ 		f->fps_counter = 0;
-	\ 		f->fps_last_time += 1000;
-	\ 	}
-	\ }
-
-    \ return (double)elapsed_time / 1000;
