@@ -23,6 +23,7 @@ ArchLinux instructions.
 # Controls
 Left Arrow - Moves left.\
 Right Arrow - Moves right.\
-Space Bar - Shows the stack.\
-Escape - Quits and closes game.
+Space Bar - Resets the Game.\
+Escape - Quits and closes game.\
+F - Prints FPS to the console.
 
