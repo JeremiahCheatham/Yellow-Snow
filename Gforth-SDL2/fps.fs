@@ -9,6 +9,8 @@ VARIABLE fps-counter
 VARIABLE fps-display FALSE fps-display !
 VARIABLE fps-last-time SDL_GetTicks fps-last-time ! 
 VARIABLE fps-elapsed-time
+VARIABLE delta-time 0e delta-time F!
+
 
 : fps-time-since ( fps-last-time -- elapsed-time )
     SDL_GetTicks DUP ROT 2DUP >= IF

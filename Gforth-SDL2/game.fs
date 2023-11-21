@@ -1,10 +1,10 @@
 require initialize-sdl.fs
 require load_media.fs
 require background.fs
+require fps.fs
 require player.fs
 require flakes.fs
 require score.fs
-require fps.fs
 
 VARIABLE winter-music
 VARIABLE collect-sound
@@ -26,8 +26,7 @@ utime DROP seed ! rnd DROP
 ;
 
 : game-reset ( -- )
-    white-array white-length flakes-array-reset
-    yellow-array yellow-length flakes-array-reset
+    flakes-reset 
     TRUE TO playing
     score-reset IF game-cleanup THEN
     winter-music @ -1 Mix_PlayMusic IF
@@ -70,7 +69,7 @@ utime DROP seed ! rnd DROP
         DUP flake-bottom player-top > IF
             DUP flake-right player-left > IF
                 DUP flake-left player-right < IF
-                    DUP SCREEN_HEIGHT flake-reset
+                    DUP white-farray I 2 * CELLS + SCREEN_HEIGHT flake-reset
                     score-increment IF game-cleanup THEN
                     -1 collect-sound @ 0 Mix_PlayChannel DROP
                 THEN
@@ -105,7 +104,6 @@ utime DROP seed ! rnd DROP
                     fps-toggle-display
                 THEN
                 SDL_SCANCODE_SPACE = IF
-                    .s CR
                     playing 0= IF
                         game-reset
                     THEN
@@ -129,7 +127,9 @@ utime DROP seed ! rnd DROP
 
         renderer @ SDL_RenderPresent
 
-        delay-update
+        \ 16 SDL_Delay
+        delay-update delta-time F!
+
     FALSE UNTIL
 ;
 
