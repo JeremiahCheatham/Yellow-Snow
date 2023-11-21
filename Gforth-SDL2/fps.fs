@@ -1,6 +1,6 @@
 60e FCONSTANT TARGET_FPS
 VARIABLE delay-target 1000e TARGET_FPS F/ delay-target F!
-VARIABLE delay-cap 20e delay-cap F!
+VARIABLE delay-cap 100e delay-cap F!
 VARIABLE delay-last SDL_GetTicks delay-last !
 VARIABLE delay-elpsed
 VARIABLE delay-carry
@@ -10,7 +10,6 @@ VARIABLE fps-display FALSE fps-display !
 VARIABLE fps-last-time SDL_GetTicks fps-last-time ! 
 VARIABLE fps-elapsed-time
 VARIABLE delta-time 0e delta-time F!
-
 
 : fps-time-since ( fps-last-time -- elapsed-time )
     SDL_GetTicks DUP ROT 2DUP >= IF
