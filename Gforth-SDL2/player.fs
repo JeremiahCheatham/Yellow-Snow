@@ -38,6 +38,9 @@ SDL_FLIP_NONE VALUE player-direction
     player-rect SDL_Rect-y int32<@ player-top-offset +
 ;
 
+: player-width ( -- n )
+    player-rect SDL_Rect-w int32<@
+;
 
 : player-update ( -- )
     0 TO player-delta
@@ -62,11 +65,11 @@ SDL_FLIP_NONE VALUE player-direction
 
     player-delta 0> IF
         player-xpos DUP F@ player-speed delta-time F@ F* F+ FDUP F!
-        F>S DUP SCREEN_WIDTH player-right-offset - >
+        F>S DUP SCREEN_WIDTH player-width - player-right-offset + DUP -ROT >
         IF
-            DROP SCREEN_WIDTH player-right-offset -
+            SWAP DROP
             DUP S>F player-xpos F!
-        THEN
+        ELSE DROP THEN
         player-rect SDL_Rect-x int32>!
         SDL_FLIP_NONE TO player-direction
     THEN
